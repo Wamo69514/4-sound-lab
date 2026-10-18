@@ -68,25 +68,38 @@
     .phrase-list { display:grid; gap:12px; }
     .phrase-row { display:grid; grid-template-columns:105px minmax(0,1fr) 100px; align-items:stretch;
       border:2px solid #b8c3cc; border-radius:12px; overflow:hidden; background:white; min-height:80px; transition:border-color .15s,box-shadow .15s; }
-    /* Tap any phrase (except Save) to choose its starting line. */
-    .phrase-row { cursor:pointer; }
+    /* Each phrase sound is editable; use LINE/START on the right to choose the starting row. */
     .phrase-row.active { border-color:#e62030; box-shadow:0 0 0 3px #ff454a24; }
-    .phrase-row:has(.cells:focus-visible) { outline:3px solid var(--blue); outline-offset:3px; }
-    .cells[role="button"] { cursor:pointer; }
-    .cells:focus-visible, .active-tag:focus-visible { outline:3px solid var(--blue); outline-offset:-3px; }
+    .phrase-slot-input:focus-visible, .active-tag:focus-visible { outline:3px solid var(--blue); outline-offset:-3px; }
     .active-tag { border:0; color:inherit; cursor:pointer; }
     .phrase-row.active .active-tag { color:#201010; }
     .save-btn { background:var(--cyan); border:0; border-right:2px solid var(--ink); font-weight:950; font-size:18px; color:var(--ink); padding:8px 4px; }
     .save-btn small { display:block; font-size:10px; letter-spacing:.04em; opacity:.8; margin-top:4px; }
     .phrase-row.saved .save-btn { background:#b5f1e4; }
     .cells { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); min-width:0; }
-    .cell { display:flex; align-items:center; justify-content:center; min-width:0; padding:8px 5px; font-size:clamp(17px,2.7vw,25px); font-weight:900; text-align:center; overflow-wrap:anywhere; border-right:1px solid #d1d7dc; }
+    .cell { display:flex; align-items:stretch; justify-content:center; min-width:0; border-right:1px solid #d1d7dc; position:relative; }
+    .cell:last-child { border-right:0; }
+    .phrase-slot-input { width:100%; min-width:0; padding:8px 3px; border:0; border-radius:0; background:transparent; color:var(--ink); font-size:clamp(15px,2.6vw,24px); font-weight:900; text-align:center; text-overflow:ellipsis; }
+    .phrase-slot-input::placeholder { color:#7d8794; }
+    .phrase-slot-input:focus { background:var(--yellow) !important; outline:3px solid #126a83; outline-offset:-3px; text-overflow:clip; }
+    .phrase-row.active .phrase-slot-input { background:#fff2f2; }
+    .phrase-row .cell.delta .phrase-slot-input { box-shadow:inset 0 -5px 0 #8ce3ee; }
+    .phrase-row.active .cell.delta .phrase-slot-input { box-shadow:inset 0 -5px 0 #51c3d1; }
+    .phrase-row.warning .phrase-slot-input { animation:warning-flash .72s steps(1,end) infinite; }
+    .phrase-row.warning .phrase-slot-input:focus { animation:none; background:var(--yellow); }
     .active-tag { display:flex; align-items:center; justify-content:center; background:#f3f5f6; font-size:13px; font-weight:950; letter-spacing:.04em; }
     .phrase-row.active .cell { background:#fff2f2; }
     .phrase-row.active .active-tag { background:var(--red); color:#201010; }
     .phrase-row.warning .cell, .phrase-row.warning .active-tag { animation:warning-flash .72s steps(1,end) infinite; }
     @keyframes warning-flash { 0%, 100% { background:var(--red); color:var(--ink); } 50% { background:#fff; color:var(--ink); } }
-    @media (prefers-reduced-motion:reduce) { .phrase-row.warning .cell, .phrase-row.warning .active-tag { animation:none; background:#ffafad; } }
+    @media (prefers-reduced-motion:reduce) { .phrase-row.warning .cell, .phrase-row.warning .active-tag, .phrase-row.warning .phrase-slot-input { animation:none; background:#ffafad; } }
+    .mode-box { margin-top:14px; padding:12px; border:1px solid #d5dce4; background:#f7f9fa; border-radius:11px; }
+    .mode-heading { font-size:12px; font-weight:950; color:#39475b; margin-bottom:9px; }
+    .mode-actions { display:grid; grid-template-columns:1fr 1fr auto; gap:8px; }
+    .mode-btn, .semi-generate-btn { min-height:45px; border:2px solid #b7c1ca; border-radius:8px; background:#fff; padding:8px 10px; font-size:14px; font-weight:900; }
+    .mode-btn[aria-pressed="true"] { border-color:#1d6676; background:#d5fbff; box-shadow:inset 0 0 0 1px #1d6676; }
+    .semi-generate-btn { background:#fff4b7; border-color:#c4a44e; }
+    .mode-note { min-height:18px; margin:8px 0 0; color:#58677a; font-size:12px; line-height:1.5; }
     .library-title { display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
     .count-chip { border-radius:20px; background:#e9edf3; color:#455365; font-size:12px; font-weight:900; padding:4px 9px; }
     .library-tools { display:flex; flex-wrap:wrap; gap:8px; }
@@ -113,7 +126,9 @@
       .status-grid { gap:7px; } .metric { padding:11px 8px; } .metric-value { font-size:clamp(20px,5vw,27px); }
       .phrase-row { grid-template-columns:86px minmax(0,1fr) 78px; min-height:72px; }
       .save-btn { font-size:15px; } .active-tag { font-size:11px; }
-      .cell { font-size:clamp(14px,3vw,21px); padding:6px 2px; }
+      .phrase-slot-input { font-size:clamp(14px,3vw,21px); padding:6px 2px; }
+      .mode-actions { grid-template-columns:1fr 1fr; }
+      .semi-generate-btn { grid-column:1/-1; }
       .library-item { grid-template-columns:1fr; }
       .library-actions { justify-content:flex-start; }
     }
@@ -126,7 +141,8 @@
       .save-btn small { display:inline; margin-left:4px; font-size:9px; }
       .active-tag { grid-column:2; grid-row:1; min-height:43px; border-bottom:1px solid #d1d7dc; font-size:12px; }
       .cells { grid-column:1/-1; grid-row:2; min-height:60px; }
-      .cell { font-size:clamp(16px,4.6vw,21px); }
+      .phrase-slot-input { font-size:clamp(15px,4.6vw,21px); min-height:59px; }
+      .mode-btn,.semi-generate-btn { font-size:13px; padding:7px 5px; }
       .actions .primary-btn { min-height:52px; } .status-grid { grid-template-columns:1fr 1fr; }
       .metric:nth-child(3) { grid-column:1/-1; } .metric-value { font-size:27px; }
       .library-tools { width:100%; }
@@ -164,7 +180,7 @@
     <header>
       <div>
         <p class="eyebrow">ONBRAKE / SCRATCH PRACTICE</p>
-        <h1>4 SOUND LAB<span style="color:var(--red)">.</span><span class="version-label">v3.1</span></h1>
+        <h1>4 SOUND LAB<span style="color:var(--red)">.</span><span class="version-label">v4.0</span></h1>
       </div>
       <div class="header-aside">EIGHT INPUTS. INFINITE PHRASES.<br>4/4 PRACTICE TOOL</div>
     </header>
@@ -190,6 +206,15 @@
         <div class="field"><label for="barSelect">切替までの小節数</label><select id="barSelect" class="bar-select" aria-label="小節数"></select></div>
         <div class="field" style="grid-column:span 2"><label for="metroToggle">METRONOME</label><label class="metro-wrap" for="metroToggle">クリック音 <input id="metroToggle" type="checkbox" checked aria-label="メトロノームを鳴らす"></label></div>
       </div>
+      <div class="mode-box">
+        <div class="mode-heading">PHRASE MODE / 生成方式</div>
+        <div class="mode-actions" role="group" aria-label="フレーズ生成方式">
+          <button id="randomModeBtn" class="mode-btn" type="button" aria-pressed="true">🎲 完全ランダム</button>
+          <button id="semiModeBtn" class="mode-btn" type="button" aria-pressed="false">🔁 半ランダム（1音ずつ）</button>
+          <button id="semiGenerateBtn" class="semi-generate-btn" type="button">1行目から生成 ↗</button>
+        </div>
+        <p id="modeNote" class="mode-note">完全ランダム：従来どおり、各音を独立して抽選します。</p>
+      </div>
       <div class="actions">
         <button id="startBtn" class="primary-btn" type="button">▶ Start</button>
         <button id="pauseBtn" class="primary-btn pause-btn" type="button" disabled>Ⅱ Pause</button>
@@ -209,7 +234,7 @@
     </section>
 
     <section class="panel" aria-labelledby="phraseTitle">
-      <div class="panel-heading"><h2 id="phraseTitle">03 / PHRASES</h2><span class="hint">行をタップして開始位置を選択（再生中はPause/Stop後） ／ 赤 = Active ／ Save = その行だけ保存・固定</span></div>
+      <div class="panel-heading"><h2 id="phraseTitle">03 / PHRASES</h2><span class="hint">4音のマスをタップして編集 ／ 行右端のLINE/STARTで開始位置を選択 ／ Saveで保存・固定 ／ 水色の下線 = 変化した音</span></div>
       <div class="phrase-list" id="phraseList"></div>
     </section>
 
@@ -221,19 +246,20 @@
       <div class="library-empty" id="libraryEmpty">Saveしたフレーズがここにたまります。<br>「読み込む」で必ず4行目へ挿入・固定します。</div>
       <div class="library-list" id="libraryList"></div>
     </section>
-    <p class="footer-note">行をタップすると、その行を開始位置に選択できます（例：4を選択すると4 → 1 → 2 → 3）。再生中に変更したいときはPause/Stopしてから選択。Activeは 1 → 2 → 3 → 4 の順に移動。切替時にActive以外の未固定行を再抽選します。Saveは押した行だけを保存・固定し、Savedを押すと固定解除（ライブラリは保持）。ライブラリの読み込み先は4行目で固定。Resetは全4行を再抽選し固定解除しますが、ライブラリは消去しません。Pauseは続きから再開できます。データは端末内に保存され、自動同期しません。iOSの画面ロック・バックグラウンド中はメトロノームが停止する場合があります。</p>
+    <p class="footer-note">4音のマスをタップすると直接編集できます（編集中の行がSavedなら固定だけ解除、元のライブラリは変更しません）。開始行は右端のLINE/STARTボタンで選択します（再生中はPause/Stop後）。完全ランダムは従来どおり。半ランダムは1行目を種に2→3→4行目をそれぞれ直前の行から1音だけ変えて用意し、4→1へ戻るたびに1音変化させて循環します。「1行目から生成」で再作成、「Start」で選択中のモードを開始します。変える音が他にない場合、同じ音のままです。Saveした行は固定優先なので1音差にならない場合があります。Saveは押した行だけをライブラリ保存・固定、読み込み先は4行目。Resetは全行を再生成・固定解除しますが、ライブラリは消しません。Pauseは続きから再開できます。データは端末内に保存され、自動同期しません。iOSの画面ロック・バックグラウンド中はメトロノームが停止する場合があります。</p>
   </main>
   <div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
 <script>
 (() => {
   'use strict';
-  const ROWS=4, SLOTS=4, INPUTS=8, STORE_KEY='onbrake-4-sound-lab-v3', LEGACY_KEY='onbrake-4-sound-lab-v2', MAX_LIBRARY=500;
+  const ROWS=4, SLOTS=4, INPUTS=8, STORE_KEY='onbrake-4-sound-lab-v4', LEGACY_KEYS=['onbrake-4-sound-lab-v3','onbrake-4-sound-lab-v2'], MAX_LIBRARY=500;
   const $=id=>document.getElementById(id);
   const soundInputs=[...document.querySelectorAll('.sound-input')];
   const refs={
     phraseList:$('phraseList'), libraryList:$('libraryList'), libraryEmpty:$('libraryEmpty'),
     libraryCount:$('libraryCount'), bpm:$('bpmInput'), bars:$('barSelect'), metro:$('metroToggle'),
     start:$('startBtn'),pause:$('pauseBtn'), stop:$('stopBtn'),reset:$('resetBtn'),
+    randomMode:$('randomModeBtn'),semiMode:$('semiModeBtn'),semiGenerate:$('semiGenerateBtn'),modeNote:$('modeNote'),
     barDisplay:$('barDisplay'), barTotal:$('barTotal'), beatDisplay:$('beatDisplay'),
     countdown:$('countdown'), runState:$('runState'),warning:$('warningLabel'),
     progress:$('progress'), progressFill:$('progressFill'),
@@ -243,12 +269,30 @@
     const option=document.createElement('option');option.value=String(bars);option.textContent=`${bars} 小節`;
     if(bars===32)option.selected=true;refs.bars.append(option);
   }
-  let phrases=[],pinned=Array(ROWS).fill(false),activeRow=0,library=[];
+  let phrases=[],pinned=Array(ROWS).fill(false),activeRow=0,library=[],mode='random',semiPrepared=false;
   let run=null,starting=false,audioCtx=null,toastTimer=null,persistWarningShown=false;
 
   function soundPool(){return soundInputs.map(el=>el.value.trim()).filter(Boolean);}
   function randomPhrase(pool=soundPool()){
     return Array.from({length:SLOTS},()=>pool.length?pool[Math.floor(Math.random()*pool.length)]:'');
+  }
+  // In semi mode, pick exactly one POSITION and replace it with a different input sound.
+  // Empty inputs are ignored. If no alternative exists, return an unchanged copy.
+  function evolveOne(previous,pool=soundPool()){
+    const eligible=[];
+    for(let j=0;j<SLOTS;j++){
+      const alternatives=pool.filter(s=>s!==previous[j]);
+      if(alternatives.length)eligible.push({j,alternatives});
+    }
+    if(!eligible.length)return [...previous];
+    const picked=eligible[Math.floor(Math.random()*eligible.length)];
+    const next=[...previous];
+    next[picked.j]=picked.alternatives[Math.floor(Math.random()*picked.alternatives.length)];
+    return next;
+  }
+  function rebuildSemiFrom(startIndex=0){
+    for(let i=startIndex+1;i<ROWS;i++)if(!pinned[i])phrases[i]=evolveOne(phrases[i-1]);
+    semiPrepared=true;
   }
   const validPhrase=a=>Array.isArray(a)&&a.length===SLOTS&&a.every(s=>typeof s==='string'&&s.length<=100);
   const equalPhrase=(a,b)=>a.every((s,i)=>s===b[i]);
@@ -259,7 +303,7 @@
     refs.toast.textContent=msg;refs.toast.classList.remove('hidden');
     toastTimer=setTimeout(()=>refs.toast.classList.add('hidden'),3200);
   }
-  function packageState(){return {version:3,sounds:soundInputs.map(el=>el.value),bpm:Number(refs.bpm.value),bars:Number(refs.bars.value),metro:refs.metro.checked,phrases,pinned,activeRow,library};}
+  function packageState(){return {version:4,sounds:soundInputs.map(el=>el.value),bpm:Number(refs.bpm.value),bars:Number(refs.bars.value),metro:refs.metro.checked,mode,semiPrepared,phrases,pinned,activeRow,library};}
   function saveState(){
     try{localStorage.setItem(STORE_KEY,JSON.stringify(packageState()));}
     catch(e){if(!persistWarningShown){persistWarningShown=true;toast('保存できません。通常のSafariで開くか、JSONバックアップを作成してください。');}}
@@ -273,6 +317,8 @@
     if(Number.isFinite(Number(data.bpm))&&String(data.bpm).trim()!=='')refs.bpm.value=String(Math.min(300,Math.max(20,Math.round(Number(data.bpm)))));
     if(Number.isInteger(Number(data.bars))&&Number(data.bars)>=8&&Number(data.bars)<=128&&Number(data.bars)%8===0)refs.bars.value=String(data.bars);
     if(typeof data.metro==='boolean')refs.metro.checked=data.metro;
+    mode=data.mode==='semi'?'semi':'random';
+    semiPrepared=mode==='semi'&&data.semiPrepared===true;
     if(Array.isArray(data.phrases)&&(data.phrases.length===3||data.phrases.length===ROWS)&&data.phrases.every(validPhrase)){
       phrases=data.phrases.map(p=>[...p]);
       while(phrases.length<ROWS)phrases.push(randomPhrase());
@@ -297,10 +343,12 @@
       const current=localStorage.getItem(STORE_KEY);
       if(current && applyData(JSON.parse(current)))return;
     }catch(e){/* Continue with legacy data */}
-    try{
-      const old=localStorage.getItem(LEGACY_KEY);
-      if(old && applyData(JSON.parse(old)))saveState();
-    }catch(e){/* Storage unavailable or malformed */}
+    for(const key of LEGACY_KEYS){
+      try{
+        const old=localStorage.getItem(key);
+        if(old && applyData(JSON.parse(old))){saveState();return;}
+      }catch(e){/* Try another older version */}
+    }
   }
   function seed(){const a=soundPool();phrases=[
     Array(SLOTS).fill(a[0]||''),
@@ -308,6 +356,7 @@
     [a[1]||a[0]||'',a[0]||'',a[0]||'',a[1]||a[0]||''],
     randomPhrase(a)
   ];}
+  function isDelta(i,j){return mode==='semi'&&i>0&&phrases[i][j]!==phrases[i-1][j];}
   function redrawPhrases(){
     const fragment=document.createDocumentFragment();
     phrases.forEach((phrase,i)=>{
@@ -319,9 +368,13 @@
       btn.textContent=pinned[i]?'Saved':'Save';
       const small=document.createElement('small');small.textContent=pinned[i]?' 🔒':` #${i+1}`;btn.append(small);
       const cells=document.createElement('div');cells.className='cells';
-      cells.role='button';cells.tabIndex=0;
-      cells.setAttribute('aria-label',`行${i+1}を開始行に選ぶ`);
-      phrase.forEach(s=>{const cell=document.createElement('div');cell.className='cell';cell.textContent=s||'—';cells.append(cell);});
+      phrase.forEach((s,j)=>{
+        const cell=document.createElement('div');cell.className=`cell${isDelta(i,j)?' delta':''}`;
+        const input=document.createElement('input');input.className='phrase-slot-input';input.type='text';input.maxLength=24;
+        input.value=s;input.placeholder='—';input.dataset.editRow=String(i);input.dataset.editSlot=String(j);
+        input.setAttribute('aria-label',`行${i+1}の${j+1}音目を編集`);
+        cell.append(input);cells.append(cell);
+      });
       const tag=document.createElement('button');tag.type='button';tag.className='active-tag';
       tag.dataset.select=String(i);tag.setAttribute('aria-pressed',String(i===activeRow));
       tag.setAttribute('aria-label',`行${i+1}を開始行に選ぶ`);
@@ -329,6 +382,45 @@
       row.append(btn,cells,tag);fragment.append(row);
     });
     refs.phraseList.replaceChildren(fragment);
+  }
+  // Update displayed inputs without replacing the one the user is typing in.
+  function syncEditedPhrases(){
+    const inputs=refs.phraseList.querySelectorAll('.phrase-slot-input');
+    inputs.forEach(input=>{
+      const i=Number(input.dataset.editRow),j=Number(input.dataset.editSlot);
+      if(document.activeElement!==input&&input.value!==phrases[i][j])input.value=phrases[i][j];
+      input.parentElement.classList.toggle('delta',isDelta(i,j));
+    });
+    refs.phraseList.querySelectorAll('.phrase-row').forEach(row=>{
+      const i=Number(row.dataset.row),button=row.querySelector('.save-btn');
+      row.classList.toggle('saved',pinned[i]);
+      button.setAttribute('aria-pressed',String(pinned[i]));
+      button.setAttribute('aria-label',`行${i+1}を${pinned[i]?'固定解除':'ライブラリに保存して固定'}`);
+      button.replaceChildren(document.createTextNode(pinned[i]?'Saved':'Save'));
+      const small=document.createElement('small');small.textContent=pinned[i]?' 🔒':` #${i+1}`;button.append(small);
+    });
+  }
+  function updateModeUI(){
+    refs.randomMode.setAttribute('aria-pressed',String(mode==='random'));
+    refs.semiMode.setAttribute('aria-pressed',String(mode==='semi'));
+    refs.modeNote.textContent=mode==='semi'
+      ?'半ランダム：1行目を起点に1音ずつ変化。Startまたは「1行目から生成」で準備。Saveした行は固定優先。'
+      :'完全ランダム：従来どおり各音を独立抽選し、切替時はActive以外を再抽選。';
+  }
+  function setMode(next){
+    if(run){toast('生成方式はStopしてから変更してください。');return;}
+    mode=next==='semi'?'semi':'random';semiPrepared=false;
+    updateModeUI();redrawPhrases();saveState();
+  }
+  function generateSemi(){
+    if(run){toast('生成するにはStopしてください。');return false;}
+    if(!soundPool().length){toast('INPUTがすべてNULLです。1つ以上入力してください。');return false;}
+    mode='semi';rebuildSemiFrom(0);
+    updateModeUI();redrawPhrases();saveState();
+    if(new Set(soundPool()).size<2 && phrases[0].every(s=>s===soundPool()[0]))
+      toast('ほかの候補音がないため変化できません。INPUTを2種類以上にすると1音ずつ変わります。');
+    else toast('1行目を起点に、2→3→4行目を1音ずつ変化させました。');
+    return true;
   }
   function redrawLibrary(){
     refs.libraryCount.textContent=`${library.length} phrases`;
@@ -379,18 +471,28 @@
     redrawPhrases();saveState();
   }
   function cycleOnce(){
-    activeRow=(activeRow+1)%ROWS;
-    for(let i=0;i<ROWS;i++)if(i!==activeRow&&!pinned[i])phrases[i]=randomPhrase();
+    const was=activeRow;activeRow=(activeRow+1)%ROWS;
+    if(mode==='semi'){
+      // The precomputed chain is visible before it becomes Active. On wrap,
+      // evolve line 1 from the previous line 4, then prepare a fresh chain.
+      if(was===ROWS-1&&activeRow===0){
+        if(!pinned[0])phrases[0]=evolveOne(phrases[was]);
+        rebuildSemiFrom(0);
+      }
+    }else{
+      for(let i=0;i<ROWS;i++)if(i!==activeRow&&!pinned[i])phrases[i]=randomPhrase();
+    }
     redrawPhrases();saveState();
   }
   function resetAll(){
     if(!soundPool().length){toast('INPUTがすべてNULLです。1つ以上入力してください。');return;}
     phrases=Array.from({length:ROWS},()=>randomPhrase());
     pinned=Array(ROWS).fill(false);
+    if(mode==='semi')rebuildSemiFrom(0);
     // Reset affects the phrase grid only; it never changes transport or library.
     redrawPhrases();
     if(run&&!run.paused)markWarning(getElapsed()%(run.bars*4*run.secondsPerBeat)>=(run.bars-2)*4*run.secondsPerBeat);
-    saveState();toast('4行を再抽選しました。保存ライブラリはそのままです。');
+    saveState();toast(mode==='semi'?'1行目を再抽選し、残りを1音ずつ展開しました。ライブラリは保持。':'4行を再抽選しました。保存ライブラリはそのままです。');
   }
   function markWarning(warning){const active=refs.phraseList.querySelector('.phrase-row.active');if(active)active.classList.toggle('warning',Boolean(warning));}
   function clockNow(){return run&&run.clock==='audio'&&audioCtx&&audioCtx.state==='running'?audioCtx.currentTime:performance.now()/1000;}
@@ -434,7 +536,17 @@
       const missed=cycleIndex-run.lastCycle;
       if(missed>30){
         activeRow=(activeRow+missed)%ROWS;
-        for(let i=0;i<ROWS;i++)if(i!==activeRow&&!pinned[i])phrases[i]=randomPhrase();
+        if(mode==='semi'){
+          // Catch up by advancing one mutation for each crossed line.
+          // 1st row of each lap is derived from the previous 4th row.
+          let row=(activeRow-Math.min(missed,200)%ROWS+ROWS)%ROWS;
+          for(let k=0;k<Math.min(missed,200);k++){
+            const next=(row+1)%ROWS;
+            if(!pinned[next])phrases[next]=evolveOne(phrases[row]);
+            row=next;
+          }
+          rebuildSemiFrom(activeRow);
+        }else for(let i=0;i<ROWS;i++)if(i!==activeRow&&!pinned[i])phrases[i]=randomPhrase();
         redrawPhrases();saveState();
       }else for(let n=0;n<missed;n++)cycleOnce();
       run.lastCycle=cycleIndex;run.lastDisplayBeat=-1;
@@ -461,6 +573,7 @@
   function updateControls(){
     const started=Boolean(run),paused=Boolean(run?.paused);
     refs.bpm.disabled=started;refs.bars.disabled=started;
+    refs.randomMode.disabled=started;refs.semiMode.disabled=started;refs.semiGenerate.disabled=started;
     refs.start.disabled=starting||(started&&!paused);
     refs.start.textContent=paused?'▶ Resume':'▶ Start';refs.start.classList.toggle('resume-state',paused);
     refs.pause.disabled=!started||paused;refs.stop.disabled=!started;
@@ -492,7 +605,8 @@
       previous.nextBeatAt=previous.startTime+previous.nextBeatIndex*previous.secondsPerBeat;
       previous.lastDisplayBeat=-1;
     }else{
-      // Keep the row the user selected instead of always starting from line 1.
+      // Selected starting row is respected in BOTH modes.
+      if(mode==='semi'&&!semiPrepared)rebuildSemiFrom(0);
       redrawPhrases();markWarning(false);
       const startTime=now+.07;
       run={bpm,bars,clock,startTime,secondsPerBeat:60/bpm,nextBeatIndex:0,nextBeatAt:startTime,
@@ -520,19 +634,36 @@
   refs.pause.addEventListener('click',pause);
   refs.stop.addEventListener('click',stop);
   refs.reset.addEventListener('click',resetAll);
+  refs.randomMode.addEventListener('click',()=>setMode('random'));
+  refs.semiMode.addEventListener('click',()=>setMode('semi'));
+  refs.semiGenerate.addEventListener('click',generateSemi);
   document.addEventListener('visibilitychange',()=>{
     if(document.hidden&&run&&!run.paused){pause();toast('画面が非表示になったので一時停止しました。Startで再開できます。');}
   });
   refs.phraseList.addEventListener('click',ev=>{
     const save=ev.target.closest('button[data-save]');
     if(save){savePhrase(Number(save.dataset.save));return;}
-    const row=ev.target.closest('.phrase-row');
-    if(row)selectStartRow(Number(row.dataset.row));
+    const select=ev.target.closest('button[data-select]');
+    if(select)selectStartRow(Number(select.dataset.select));
+  });
+  // Direct inline edit: the selected sound is always a real text input.
+  refs.phraseList.addEventListener('input',ev=>{
+    const field=ev.target.closest('input[data-edit-row]');if(!field)return;
+    const i=Number(field.dataset.editRow),j=Number(field.dataset.editSlot);
+    if(i<0||i>=ROWS||j<0||j>=SLOTS)return;
+    phrases[i][j]=field.value;
+    if(pinned[i]){pinned[i]=false;syncEditedPhrases();}
+    saveState();
+  });
+  refs.phraseList.addEventListener('change',ev=>{
+    const field=ev.target.closest('input[data-edit-row]');if(!field)return;
+    const i=Number(field.dataset.editRow),j=Number(field.dataset.editSlot);
+    phrases[i][j]=field.value.trim();field.value=phrases[i][j];
+    if(mode==='semi')rebuildSemiFrom(i);
+    syncEditedPhrases();saveState();
   });
   refs.phraseList.addEventListener('keydown',ev=>{
-    if((ev.key==='Enter'||ev.key===' ')&&ev.target.classList.contains('cells')){
-      ev.preventDefault();selectStartRow(Number(ev.target.closest('.phrase-row')?.dataset.row));
-    }
+    if(ev.key==='Enter'&&ev.target.matches('input[data-edit-row]'))ev.target.blur();
   });
   refs.libraryList.addEventListener('click',ev=>{
     const load=ev.target.closest('button[data-load]'),del=ev.target.closest('button[data-delete]');
@@ -554,7 +685,11 @@
     item.name=input.value.trim().slice(0,80)||'無題のフレーズ';input.value=item.name;saveState();
   });
   soundInputs.forEach(el=>el.addEventListener('change',()=>{
-    if(soundPool().length){for(let i=0;i<ROWS;i++)if(i!==activeRow&&!pinned[i])phrases[i]=randomPhrase();redrawPhrases();}
+    if(soundPool().length){
+      if(mode==='semi')rebuildSemiFrom(0);
+      else for(let i=0;i<ROWS;i++)if(i!==activeRow&&!pinned[i])phrases[i]=randomPhrase();
+      redrawPhrases();
+    }
     saveState();
   }));
   refs.bpm.addEventListener('change',()=>{
@@ -567,7 +702,7 @@
     const data={...packageState(),exported:new Date().toISOString()};
     const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;
-    a.download=`4-sound-lab-v3.1-backup-${new Date().toISOString().slice(0,10)}.json`;
+    a.download=`4-sound-lab-v4-backup-${new Date().toISOString().slice(0,10)}.json`;
     document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);toast('バックアップを保存しました。');
   });
   $('importBtn').addEventListener('click',()=>$('importFile').click());
@@ -576,16 +711,16 @@
     try{
       if(f.size>2*1024*1024)throw Error('too-big');
       const data=JSON.parse(await f.text());
-      if(![2,3].includes(data.version)||!Array.isArray(data.library)||!Array.isArray(data.phrases)||!
+      if(![2,3,4].includes(data.version)||!Array.isArray(data.library)||!Array.isArray(data.phrases)||!
         [3,4].includes(data.phrases.length)||!data.phrases.every(validPhrase))throw Error('format');
       if(!confirm('現在のライブラリ・設定・4行のフレーズを置き換えます。続けますか？'))return;
       stop();activeRow=0;applyData(data);redrawPhrases();redrawLibrary();
       refs.barTotal.textContent=refs.bars.value;saveState();toast('バックアップを読み込みました。');
-    }catch(e){toast('読み込み失敗。4 SOUND LAB v2/v3のJSONバックアップを選んでください。');}
+    }catch(e){toast('読み込み失敗。4 SOUND LAB v2/v3/v4のJSONバックアップを選んでください。');}
     finally{ev.target.value='';}
   });
   seed();readState();refs.barTotal.textContent=refs.bars.value;
-  redrawPhrases();redrawLibrary();updateControls();
+  updateModeUI();redrawPhrases();redrawLibrary();updateControls();
   if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')){
     navigator.serviceWorker.register('./sw.js').catch(()=>{});
   }
