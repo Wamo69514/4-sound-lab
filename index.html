@@ -68,7 +68,14 @@
     .phrase-list { display:grid; gap:12px; }
     .phrase-row { display:grid; grid-template-columns:105px minmax(0,1fr) 100px; align-items:stretch;
       border:2px solid #b8c3cc; border-radius:12px; overflow:hidden; background:white; min-height:80px; transition:border-color .15s,box-shadow .15s; }
+    /* Tap any phrase (except Save) to choose its starting line. */
+    .phrase-row { cursor:pointer; }
     .phrase-row.active { border-color:#e62030; box-shadow:0 0 0 3px #ff454a24; }
+    .phrase-row:has(.cells:focus-visible) { outline:3px solid var(--blue); outline-offset:3px; }
+    .cells[role="button"] { cursor:pointer; }
+    .cells:focus-visible, .active-tag:focus-visible { outline:3px solid var(--blue); outline-offset:-3px; }
+    .active-tag { border:0; color:inherit; cursor:pointer; }
+    .phrase-row.active .active-tag { color:#201010; }
     .save-btn { background:var(--cyan); border:0; border-right:2px solid var(--ink); font-weight:950; font-size:18px; color:var(--ink); padding:8px 4px; }
     .save-btn small { display:block; font-size:10px; letter-spacing:.04em; opacity:.8; margin-top:4px; }
     .phrase-row.saved .save-btn { background:#b5f1e4; }
@@ -125,6 +132,31 @@
       .library-tools { width:100%; }
       .library-tools .secondary-btn { flex:1; }
     }
+
+    /* v3: eight inputs and a four-control transport */
+    .sound-input::placeholder { color:#626000; opacity:.55; font-weight:700; }
+    .sound-input:placeholder-shown { background:#fffac5; }
+    .actions { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); }
+    .actions .primary-btn { flex:initial; min-width:0; padding:8px 4px; }
+    .primary-btn#pauseBtn { background:#fff6be; }
+    .primary-btn#stopBtn { flex:initial; background:#fff; }
+    .primary-btn#resetBtn { background:#f0f2f5; font-size:18px; }
+    .primary-btn#startBtn.resume-state { background:#bdf4dd; }
+    .phrase-row.saved .save-btn { background:#b5f1e4; }
+    .library-actions .load-btn { min-width:105px; }
+    .version-label { display:inline-block; vertical-align:middle; margin-left:8px; font:900 11px system-ui,sans-serif; background:#e5eaef; color:#344154; border-radius:5px; padding:4px 6px; }
+    @media (max-width:760px) {
+      .sound-grid { grid-template-columns:repeat(4,minmax(0,1fr)); }
+      .actions { gap:8px; }
+      .actions .primary-btn { font-size:17px; }
+    }
+    @media (max-width:440px) {
+      .sound-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .sound-input { font-size:17px; padding:11px 9px; }
+      .actions { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .actions .primary-btn { min-height:50px; font-size:17px; }
+      .library-actions .load-btn { flex:1; }
+    }
   </style>
 </head>
 <body>
@@ -132,18 +164,22 @@
     <header>
       <div>
         <p class="eyebrow">ONBRAKE / SCRATCH PRACTICE</p>
-        <h1>4 SOUND LAB<span style="color:var(--red)">.</span></h1>
+        <h1>4 SOUND LAB<span style="color:var(--red)">.</span><span class="version-label">v3.1</span></h1>
       </div>
-      <div class="header-aside">FOUR SOUNDS. INFINITE PHRASES.<br>4/4 PRACTICE TOOL</div>
+      <div class="header-aside">EIGHT INPUTS. INFINITE PHRASES.<br>4/4 PRACTICE TOOL</div>
     </header>
 
     <section class="panel" aria-labelledby="soundsTitle">
-      <div class="panel-heading"><h2 id="soundsTitle">01 / SOUND INPUT</h2><span class="hint">黄色の枠に、出したい4種類のスクラッチ音を入力</span></div>
+      <div class="panel-heading"><h2 id="soundsTitle">01 / SOUND INPUT</h2><span class="hint">最大8種類の音を入力。空欄（NULL）は抽選対象外</span></div>
       <div class="sound-grid" id="soundGrid">
-        <div class="sound-entry"><label for="sound0">SOUND 1</label><input id="sound0" class="sound-input" type="text" maxlength="24" value="キュ"></div>
-        <div class="sound-entry"><label for="sound1">SOUND 2</label><input id="sound1" class="sound-input" type="text" maxlength="24" value="キューウ"></div>
-        <div class="sound-entry"><label for="sound2">SOUND 3</label><input id="sound2" class="sound-input" type="text" maxlength="24" value="キュキュ"></div>
-        <div class="sound-entry"><label for="sound3">SOUND 4</label><input id="sound3" class="sound-input" type="text" maxlength="24" value="キュッ"></div>
+        <div class="sound-entry"><label for="sound0">SOUND 1</label><input id="sound0" class="sound-input" type="text" maxlength="24" value="キュ" placeholder="NULL" aria-label="スクラッチ音1"></div>
+        <div class="sound-entry"><label for="sound1">SOUND 2</label><input id="sound1" class="sound-input" type="text" maxlength="24" value="キューウ" placeholder="NULL" aria-label="スクラッチ音2"></div>
+        <div class="sound-entry"><label for="sound2">SOUND 3</label><input id="sound2" class="sound-input" type="text" maxlength="24" value="キュキュ" placeholder="NULL" aria-label="スクラッチ音3"></div>
+        <div class="sound-entry"><label for="sound3">SOUND 4</label><input id="sound3" class="sound-input" type="text" maxlength="24" value="キュッ" placeholder="NULL" aria-label="スクラッチ音4"></div>
+        <div class="sound-entry"><label for="sound4">SOUND 5</label><input id="sound4" class="sound-input" type="text" maxlength="24" value="" placeholder="NULL" aria-label="スクラッチ音5"></div>
+        <div class="sound-entry"><label for="sound5">SOUND 6</label><input id="sound5" class="sound-input" type="text" maxlength="24" value="" placeholder="NULL" aria-label="スクラッチ音6"></div>
+        <div class="sound-entry"><label for="sound6">SOUND 7</label><input id="sound6" class="sound-input" type="text" maxlength="24" value="" placeholder="NULL" aria-label="スクラッチ音7"></div>
+        <div class="sound-entry"><label for="sound7">SOUND 8</label><input id="sound7" class="sound-input" type="text" maxlength="24" value="" placeholder="NULL" aria-label="スクラッチ音8"></div>
       </div>
     </section>
 
@@ -154,7 +190,12 @@
         <div class="field"><label for="barSelect">切替までの小節数</label><select id="barSelect" class="bar-select" aria-label="小節数"></select></div>
         <div class="field" style="grid-column:span 2"><label for="metroToggle">METRONOME</label><label class="metro-wrap" for="metroToggle">クリック音 <input id="metroToggle" type="checkbox" checked aria-label="メトロノームを鳴らす"></label></div>
       </div>
-      <div class="actions"><button id="startBtn" class="primary-btn" type="button">▶ Start</button><button id="stopBtn" class="primary-btn" type="button" disabled>■ Stop</button></div>
+      <div class="actions">
+        <button id="startBtn" class="primary-btn" type="button">▶ Start</button>
+        <button id="pauseBtn" class="primary-btn pause-btn" type="button" disabled>Ⅱ Pause</button>
+        <button id="stopBtn" class="primary-btn stop-btn" type="button" disabled>■ Stop</button>
+        <button id="resetBtn" class="primary-btn reset-btn" type="button">↻ Reset</button>
+      </div>
     </section>
 
     <section class="panel" aria-label="練習状況">
@@ -168,7 +209,7 @@
     </section>
 
     <section class="panel" aria-labelledby="phraseTitle">
-      <div class="panel-heading"><h2 id="phraseTitle">03 / PHRASES</h2><span class="hint">赤 = 現在のフレーズ ／ Save = 固定してライブラリにも登録</span></div>
+      <div class="panel-heading"><h2 id="phraseTitle">03 / PHRASES</h2><span class="hint">行をタップして開始位置を選択（再生中はPause/Stop後） ／ 赤 = Active ／ Save = その行だけ保存・固定</span></div>
       <div class="phrase-list" id="phraseList"></div>
     </section>
 
@@ -177,106 +218,127 @@
         <div class="library-title"><h2 id="libraryTitle">04 / SAVED LIBRARY</h2><span class="count-chip" id="libraryCount">0 phrases</span></div>
         <div class="library-tools"><button class="secondary-btn" id="exportBtn" type="button">バックアップを書き出す</button><button class="secondary-btn" id="importBtn" type="button">バックアップを読み込む</button><input id="importFile" type="file" accept="application/json,.json" class="hidden" aria-label="バックアップJSON"></div>
       </div>
-      <div class="library-empty" id="libraryEmpty">Saveしたフレーズがここにたまります。<br>名前を付けて、いつでも好きな行へ読み込めます。</div>
+      <div class="library-empty" id="libraryEmpty">Saveしたフレーズがここにたまります。<br>「読み込む」で必ず4行目へ挿入・固定します。</div>
       <div class="library-list" id="libraryList"></div>
     </section>
-    <p class="footer-note">Activeは 1 → 2 → 3 の順に移動し、切替時にActive以外の未固定フレーズだけを再生成します。Saveを解除してもライブラリには残ります。データはこのブラウザ内に保存され、端末間では自動同期しません。画面ロック・バックグラウンド中は、iPhone/iPadの制限によりメトロノームが止まる場合があります。</p>
+    <p class="footer-note">行をタップすると、その行を開始位置に選択できます（例：4を選択すると4 → 1 → 2 → 3）。再生中に変更したいときはPause/Stopしてから選択。Activeは 1 → 2 → 3 → 4 の順に移動。切替時にActive以外の未固定行を再抽選します。Saveは押した行だけを保存・固定し、Savedを押すと固定解除（ライブラリは保持）。ライブラリの読み込み先は4行目で固定。Resetは全4行を再抽選し固定解除しますが、ライブラリは消去しません。Pauseは続きから再開できます。データは端末内に保存され、自動同期しません。iOSの画面ロック・バックグラウンド中はメトロノームが停止する場合があります。</p>
   </main>
   <div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
 <script>
 (() => {
   'use strict';
-  const ROWS = 3, SLOTS = 4, STORE_KEY = 'onbrake-4-sound-lab-v2', MAX_LIBRARY = 500;
-  const $ = id => document.getElementById(id);
-  const soundInputs = Array.from(document.querySelectorAll('.sound-input'));
-  const refs = {
+  const ROWS=4, SLOTS=4, INPUTS=8, STORE_KEY='onbrake-4-sound-lab-v3', LEGACY_KEY='onbrake-4-sound-lab-v2', MAX_LIBRARY=500;
+  const $=id=>document.getElementById(id);
+  const soundInputs=[...document.querySelectorAll('.sound-input')];
+  const refs={
     phraseList:$('phraseList'), libraryList:$('libraryList'), libraryEmpty:$('libraryEmpty'),
     libraryCount:$('libraryCount'), bpm:$('bpmInput'), bars:$('barSelect'), metro:$('metroToggle'),
-    start:$('startBtn'), stop:$('stopBtn'), barDisplay:$('barDisplay'), barTotal:$('barTotal'),
-    beatDisplay:$('beatDisplay'), countdown:$('countdown'), runState:$('runState'),
-    warning:$('warningLabel'), progress:$('progress'), progressFill:$('progressFill'),
-    dots:[...document.querySelectorAll('.beat-dot')], toast:$('toast')
+    start:$('startBtn'),pause:$('pauseBtn'), stop:$('stopBtn'),reset:$('resetBtn'),
+    barDisplay:$('barDisplay'), barTotal:$('barTotal'), beatDisplay:$('beatDisplay'),
+    countdown:$('countdown'), runState:$('runState'),warning:$('warningLabel'),
+    progress:$('progress'), progressFill:$('progressFill'),
+    dots:[...document.querySelectorAll('.beat-dot')],toast:$('toast')
   };
-  for (let bars=8; bars<=128; bars+=8) {
-    const option=document.createElement('option'); option.value=String(bars); option.textContent=`${bars} 小節`;
-    if (bars===32) option.selected=true;
-    refs.bars.append(option);
+  for(let bars=8;bars<=128;bars+=8){
+    const option=document.createElement('option');option.value=String(bars);option.textContent=`${bars} 小節`;
+    if(bars===32)option.selected=true;refs.bars.append(option);
   }
-  let phrases=[], pinned=[false,false,false], activeRow=0, library=[];
-  let run=null, starting=false, audioCtx=null, toastTimer=null, persistWarningShown=false;
+  let phrases=[],pinned=Array(ROWS).fill(false),activeRow=0,library=[];
+  let run=null,starting=false,audioCtx=null,toastTimer=null,persistWarningShown=false;
 
-  const sounds = () => soundInputs.map(el=>el.value.trim()).filter(Boolean);
-  const choose = arr => arr[Math.floor(Math.random()*arr.length)] || '';
-  const randomPhrase = () => Array.from({length:SLOTS},()=>choose(sounds()));
-  const validPhrase = a => Array.isArray(a)&&a.length===4&&a.every(s=>typeof s==='string'&&s.length<=100);
-  const equalPhrase = (a,b) => a.every((s,i)=>s===b[i]);
-  const safeId = () => (typeof crypto!=='undefined'&&typeof crypto.randomUUID==='function') ? crypto.randomUUID() : String(Date.now())+'-'+Math.random().toString(36).slice(2);
-  const fmtTime = seconds => {
-    const s=Math.max(0,Math.ceil(seconds));
-    return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
-  };
-  function toast(msg) {
-    if (toastTimer) clearTimeout(toastTimer);
-    refs.toast.textContent=msg; refs.toast.classList.remove('hidden');
-    toastTimer=setTimeout(()=>refs.toast.classList.add('hidden'),3300);
+  function soundPool(){return soundInputs.map(el=>el.value.trim()).filter(Boolean);}
+  function randomPhrase(pool=soundPool()){
+    return Array.from({length:SLOTS},()=>pool.length?pool[Math.floor(Math.random()*pool.length)]:'');
   }
-  function saveState() {
-    try {
-      localStorage.setItem(STORE_KEY,JSON.stringify({version:2, sounds:soundInputs.map(el=>el.value), bpm:Number(refs.bpm.value), bars:Number(refs.bars.value), metro:refs.metro.checked, phrases, pinned, library}));
-    } catch(e) { if(!persistWarningShown){toast('保存できません。Safariの通常タブで開くかバックアップを書き出してください。');persistWarningShown=true;} }
+  const validPhrase=a=>Array.isArray(a)&&a.length===SLOTS&&a.every(s=>typeof s==='string'&&s.length<=100);
+  const equalPhrase=(a,b)=>a.every((s,i)=>s===b[i]);
+  const safeId=()=>typeof crypto!=='undefined'&&typeof crypto.randomUUID==='function'?crypto.randomUUID():String(Date.now())+'-'+Math.random().toString(36).slice(2);
+  function fmtTime(seconds){const n=Math.max(0,Math.ceil(seconds));return `${String(Math.floor(n/60)).padStart(2,'0')}:${String(n%60).padStart(2,'0')}`;}
+  function toast(msg){
+    if(toastTimer)clearTimeout(toastTimer);
+    refs.toast.textContent=msg;refs.toast.classList.remove('hidden');
+    toastTimer=setTimeout(()=>refs.toast.classList.add('hidden'),3200);
   }
-  function applyData(data) {
-    if (!data || typeof data!=='object') return false;
-    if (Array.isArray(data.sounds)&&data.sounds.length===4) data.sounds.forEach((s,i)=>{if(typeof s==='string')soundInputs[i].value=s.slice(0,24);});
-    if (Number.isFinite(Number(data.bpm))) refs.bpm.value=String(Math.min(300,Math.max(20,Math.round(Number(data.bpm)))));
-    if (Number.isInteger(Number(data.bars))&&Number(data.bars)>=8&&Number(data.bars)<=128&&Number(data.bars)%8===0) refs.bars.value=String(data.bars);
-    if (typeof data.metro==='boolean') refs.metro.checked=data.metro;
-    if (Array.isArray(data.phrases)&&data.phrases.length===ROWS&&data.phrases.every(validPhrase)) phrases=data.phrases.map(p=>[...p]);
-    if (Array.isArray(data.pinned)&&data.pinned.length===ROWS) pinned=data.pinned.map(Boolean);
-    if (Array.isArray(data.library)) {
+  function packageState(){return {version:3,sounds:soundInputs.map(el=>el.value),bpm:Number(refs.bpm.value),bars:Number(refs.bars.value),metro:refs.metro.checked,phrases,pinned,activeRow,library};}
+  function saveState(){
+    try{localStorage.setItem(STORE_KEY,JSON.stringify(packageState()));}
+    catch(e){if(!persistWarningShown){persistWarningShown=true;toast('保存できません。通常のSafariで開くか、JSONバックアップを作成してください。');}}
+  }
+  function applyData(data){
+    if(!data||typeof data!=='object')return false;
+    // Import/migrate v2 (4 inputs, 3 rows) without losing the saved library.
+    if(Array.isArray(data.sounds)&&(data.sounds.length===4||data.sounds.length===INPUTS)){
+      soundInputs.forEach((el,i)=>el.value=typeof data.sounds[i]==='string'?data.sounds[i].slice(0,24):'');
+    }
+    if(Number.isFinite(Number(data.bpm))&&String(data.bpm).trim()!=='')refs.bpm.value=String(Math.min(300,Math.max(20,Math.round(Number(data.bpm)))));
+    if(Number.isInteger(Number(data.bars))&&Number(data.bars)>=8&&Number(data.bars)<=128&&Number(data.bars)%8===0)refs.bars.value=String(data.bars);
+    if(typeof data.metro==='boolean')refs.metro.checked=data.metro;
+    if(Array.isArray(data.phrases)&&(data.phrases.length===3||data.phrases.length===ROWS)&&data.phrases.every(validPhrase)){
+      phrases=data.phrases.map(p=>[...p]);
+      while(phrases.length<ROWS)phrases.push(randomPhrase());
+    }
+    if(Array.isArray(data.pinned)&&(data.pinned.length===3||data.pinned.length===ROWS)){
+      pinned=data.pinned.map(Boolean);
+      while(pinned.length<ROWS)pinned.push(false);
+    }
+    if(Number.isInteger(data.activeRow)&&data.activeRow>=0&&data.activeRow<ROWS)activeRow=data.activeRow;
+    if(Array.isArray(data.library)){
       library=data.library.slice(0,MAX_LIBRARY).filter(item=>item&&validPhrase(item.phrase)).map(item=>({
-        id:typeof item.id==='string' ? item.id : safeId(),
-        name:typeof item.name==='string' ? item.name.slice(0,80) : '保存フレーズ',
+        id:typeof item.id==='string'&&item.id?item.id:safeId(),
+        name:typeof item.name==='string'?item.name.slice(0,80):'保存フレーズ',
         phrase:[...item.phrase],
-        created: typeof item.created==='string'?item.created:new Date().toISOString()
+        created:typeof item.created==='string'?item.created:new Date().toISOString()
       }));
     }
     return true;
   }
-  function readState() {
-    try { const raw=localStorage.getItem(STORE_KEY); if(raw) applyData(JSON.parse(raw)); } catch(e) { /* 保存不可環境でもアプリ自体は使える */ }
+  function readState(){
+    try{
+      const current=localStorage.getItem(STORE_KEY);
+      if(current && applyData(JSON.parse(current)))return;
+    }catch(e){/* Continue with legacy data */}
+    try{
+      const old=localStorage.getItem(LEGACY_KEY);
+      if(old && applyData(JSON.parse(old)))saveState();
+    }catch(e){/* Storage unavailable or malformed */}
   }
-  function seed() {
-    const a=sounds();
-    phrases=[Array(4).fill(a[0]||'キュ'), Array(4).fill(a[1]||a[0]||'キューウ'), [a[1]||'キューウ',a[0]||'キュ',a[0]||'キュ',a[1]||'キューウ']];
-  }
-  function redrawPhrases() {
+  function seed(){const a=soundPool();phrases=[
+    Array(SLOTS).fill(a[0]||''),
+    Array(SLOTS).fill(a[1]||a[0]||''),
+    [a[1]||a[0]||'',a[0]||'',a[0]||'',a[1]||a[0]||''],
+    randomPhrase(a)
+  ];}
+  function redrawPhrases(){
     const fragment=document.createDocumentFragment();
     phrases.forEach((phrase,i)=>{
       const row=document.createElement('div');
-      row.className=`phrase-row${i===activeRow?' active':''}${pinned[i]?' saved':''}`;
-      row.dataset.row=String(i);
-      const btn=document.createElement('button');
-      btn.type='button'; btn.className='save-btn'; btn.dataset.save=String(i);
+      row.className=`phrase-row${i===activeRow?' active':''}${pinned[i]?' saved':''}`;row.dataset.row=String(i);
+      const btn=document.createElement('button');btn.type='button';btn.className='save-btn';btn.dataset.save=String(i);
       btn.setAttribute('aria-pressed',String(pinned[i]));
-      btn.setAttribute('aria-label',`行${i+1}を${pinned[i]?'固定解除':'保存して固定'}`);
+      btn.setAttribute('aria-label',`行${i+1}を${pinned[i]?'固定解除':'ライブラリに保存して固定'}`);
       btn.textContent=pinned[i]?'Saved':'Save';
       const small=document.createElement('small');small.textContent=pinned[i]?' 🔒':` #${i+1}`;btn.append(small);
       const cells=document.createElement('div');cells.className='cells';
+      cells.role='button';cells.tabIndex=0;
+      cells.setAttribute('aria-label',`行${i+1}を開始行に選ぶ`);
       phrase.forEach(s=>{const cell=document.createElement('div');cell.className='cell';cell.textContent=s||'—';cells.append(cell);});
-      const tag=document.createElement('div');tag.className='active-tag';tag.textContent=i===activeRow?'● ACTIVE':`LINE 0${i+1}`;
+      const tag=document.createElement('button');tag.type='button';tag.className='active-tag';
+      tag.dataset.select=String(i);tag.setAttribute('aria-pressed',String(i===activeRow));
+      tag.setAttribute('aria-label',`行${i+1}を開始行に選ぶ`);
+      tag.textContent=i===activeRow?(run?'● ACTIVE':'▶ START'):`LINE 0${i+1}`;
       row.append(btn,cells,tag);fragment.append(row);
     });
     refs.phraseList.replaceChildren(fragment);
   }
-  function redrawLibrary() {
+  function redrawLibrary(){
     refs.libraryCount.textContent=`${library.length} phrases`;
     refs.libraryEmpty.classList.toggle('hidden',library.length>0);
     const fragment=document.createDocumentFragment();
-    for (const item of library) {
+    for(const item of library){
       const node=document.createElement('article');node.className='library-item';node.dataset.id=item.id;
       const main=document.createElement('div');main.className='library-main';
-      const title=document.createElement('input');title.className='library-name';title.type='text';title.maxLength=80;title.value=item.name;title.setAttribute('aria-label','フレーズの名前');title.dataset.rename=item.id;
+      const title=document.createElement('input');title.className='library-name';title.type='text';title.maxLength=80;
+      title.value=item.name;title.setAttribute('aria-label','フレーズの名前');title.dataset.rename=item.id;
       const date=document.createElement('span');date.className='library-notes';
       const dt=new Date(item.created);date.textContent=Number.isNaN(dt.valueOf())?'':dt.toLocaleDateString('ja-JP');
       const line=document.createElement('div');line.append(title,date);
@@ -284,153 +346,206 @@
       for(const s of item.phrase){const tag=document.createElement('span');tag.textContent=s||'—';tags.append(tag);}
       main.append(line,tags);
       const actions=document.createElement('div');actions.className='library-actions';
-      const target=document.createElement('select');target.className='library-target';target.dataset.target=item.id;
-      target.setAttribute('aria-label','読み込み先の行');
-      for(let i=0;i<ROWS;i++){const opt=document.createElement('option');opt.value=String(i);opt.textContent=`行 ${i+1}`;target.append(opt);}
-      target.value=String(activeRow);
-      const load=document.createElement('button');load.type='button';load.className='load-btn';load.dataset.load=item.id;load.textContent='読み込む';
+      const load=document.createElement('button');load.type='button';load.className='load-btn';load.dataset.load=item.id;load.textContent='行4へ読み込む';
+      load.setAttribute('aria-label',`${item.name}を4行目に読み込む`);
       const del=document.createElement('button');del.type='button';del.className='delete-btn';del.dataset.delete=item.id;del.textContent='削除';
-      actions.append(target,load,del);node.append(main,actions);fragment.append(node);
+      actions.append(load,del);node.append(main,actions);fragment.append(node);
     }
     refs.libraryList.replaceChildren(fragment);
   }
-  function savePhrase(i) {
-    if (pinned[i]) { pinned[i]=false; toast(`行${i+1}の固定を解除しました（ライブラリには残ります）`); }
-    else {
+  function selectStartRow(i){
+    if(!Number.isInteger(i)||i<0||i>=ROWS)return;
+    if(run&&!run.paused){toast('再生中です。PauseまたはStopしてから開始行を選択してください。');return;}
+    if(activeRow===i)return;
+    activeRow=i;
+    redrawPhrases();markWarning(false);saveState();
+    toast(run?.paused?`行${i+1}を選択。Resume後はここから続けます。`:`開始行を${i+1}に設定。Startでこの行から始まります。`);
+  }
+  function savePhrase(i){
+    if(!Number.isInteger(i)||i<0||i>=ROWS)return;
+    if(pinned[i]){
+      pinned[i]=false;
+      toast(`行${i+1}の固定を解除しました。保存済みライブラリは残ります。`);
+    }else{
+      const phrase=[...phrases[i]];
+      if(phrase.every(s=>!s)){toast('空欄のフレーズは保存できません。');return;}
+      if(!library.some(item=>equalPhrase(item.phrase,phrase))){
+        if(library.length>=MAX_LIBRARY){toast('ライブラリは500件までです。不要なものを削除してください。');return;}
+        library.unshift({id:safeId(),name:`フレーズ ${String(library.length+1).padStart(2,'0')}`,phrase,created:new Date().toISOString()});
+        redrawLibrary();toast(`行${i+1}だけをライブラリに保存し、固定しました。`);
+      }else{toast(`行${i+1}を固定しました（このフレーズは登録済みです）。`);}
       pinned[i]=true;
-      let found=library.find(item=>equalPhrase(item.phrase,phrases[i]));
-      if (!found && library.length<MAX_LIBRARY) {
-        const num=library.length+1;
-        found={id:safeId(),name:`フレーズ ${String(num).padStart(2,'0')}`,phrase:[...phrases[i]],created:new Date().toISOString()};
-        library.unshift(found);
-        redrawLibrary();toast(`行${i+1}を固定・ライブラリに登録しました`);
-      } else if (found) toast(`行${i+1}を固定しました（同じフレーズは登録済みです）`);
-      else toast('ライブラリの上限500件です。先に不要なものを削除してください。');
     }
     redrawPhrases();saveState();
   }
-  function cycleOnce() {
+  function cycleOnce(){
     activeRow=(activeRow+1)%ROWS;
-    for(let i=0;i<ROWS;i++) if(i!==activeRow&&!pinned[i]) phrases[i]=randomPhrase();
-    redrawPhrases(); saveState();
+    for(let i=0;i<ROWS;i++)if(i!==activeRow&&!pinned[i])phrases[i]=randomPhrase();
+    redrawPhrases();saveState();
   }
-  function markWarning(isWarning) {
-    const active=refs.phraseList.querySelector('.phrase-row.active');
-    if(active) active.classList.toggle('warning',isWarning);
+  function resetAll(){
+    if(!soundPool().length){toast('INPUTがすべてNULLです。1つ以上入力してください。');return;}
+    phrases=Array.from({length:ROWS},()=>randomPhrase());
+    pinned=Array(ROWS).fill(false);
+    // Reset affects the phrase grid only; it never changes transport or library.
+    redrawPhrases();
+    if(run&&!run.paused)markWarning(getElapsed()%(run.bars*4*run.secondsPerBeat)>=(run.bars-2)*4*run.secondsPerBeat);
+    saveState();toast('4行を再抽選しました。保存ライブラリはそのままです。');
   }
-  function getClock() {return (run && run.clock==='audio' && audioCtx && audioCtx.state==='running')?audioCtx.currentTime:performance.now()/1000;}
-  function clickAt(time, downbeat) {
-    if (!audioCtx||audioCtx.state!=='running') return;
-    const osc=audioCtx.createOscillator();const gain=audioCtx.createGain();
+  function markWarning(warning){const active=refs.phraseList.querySelector('.phrase-row.active');if(active)active.classList.toggle('warning',Boolean(warning));}
+  function clockNow(){return run&&run.clock==='audio'&&audioCtx&&audioCtx.state==='running'?audioCtx.currentTime:performance.now()/1000;}
+  function getElapsed(){return run?(run.paused?run.pausedElapsed:Math.max(0,clockNow()-run.startTime)):0;}
+  function clickAt(time,downbeat){
+    if(!audioCtx||audioCtx.state!=='running'||!run||run.paused)return;
+    const owner=run,osc=audioCtx.createOscillator(),gain=audioCtx.createGain();
     osc.type='sine';osc.frequency.setValueAtTime(downbeat?1160:790,time);
-    gain.gain.setValueAtTime(0.0001,time);
-    gain.gain.exponentialRampToValueAtTime(downbeat?0.21:0.12,time+.003);
-    gain.gain.exponentialRampToValueAtTime(0.0001,time+.047);
-    osc.connect(gain);gain.connect(audioCtx.destination);
-    if(run) run.oscillators.add(osc);
-    osc.onended=()=>{try{osc.disconnect();gain.disconnect();}catch(e){} if(run)run.oscillators.delete(osc);};
+    gain.gain.setValueAtTime(.0001,time);gain.gain.exponentialRampToValueAtTime(downbeat?.21:.12,time+.003);
+    gain.gain.exponentialRampToValueAtTime(.0001,time+.047);
+    osc.connect(gain);gain.connect(audioCtx.destination);owner.oscillators.add(osc);
+    osc.onended=()=>{try{osc.disconnect();gain.disconnect();}catch(e){}owner.oscillators.delete(osc);};
     osc.start(time);osc.stop(time+.052);
   }
-  function scheduleAudio() {
-    if (!run||run.clock!=='audio') return;
+  function clearOscillators(owner){
+    for(const osc of owner.oscillators){try{osc.onended=null;osc.stop();osc.disconnect();}catch(e){}}
+    owner.oscillators.clear();
+  }
+  function stopClock(){
+    if(!run)return;
+    if(run.frame!==null){cancelAnimationFrame(run.frame);run.frame=null;}
+    if(run.scheduler!==null){clearInterval(run.scheduler);run.scheduler=null;}
+    clearOscillators(run);
+  }
+  function scheduleAudio(){
+    if(!run||run.paused||run.clock!=='audio'||!audioCtx||audioCtx.state!=='running')return;
     const current=audioCtx.currentTime;
-    while(run.nextBeatAt<=current+.115) {
+    while(run.nextBeatAt<=current+.115){
       const when=Math.max(run.nextBeatAt,current+.002);
-      if (refs.metro.checked && run.nextBeatAt>=current-.04) clickAt(when,run.nextBeatIndex%4===0);
+      if(refs.metro.checked&&run.nextBeatAt>=current-.035)clickAt(when,run.nextBeatIndex%4===0);
       run.nextBeatIndex++;run.nextBeatAt=run.startTime+run.nextBeatIndex*run.secondsPerBeat;
     }
   }
-  function showStatus() {
+  function displayAt(elapsed){
     if(!run)return;
-    const now=getClock();
-    const elapsed=Math.max(0,now-run.startTime);
+    const secondsPerCycle=run.bars*4*run.secondsPerBeat;
     const beatNumber=Math.floor(elapsed/run.secondsPerBeat);
     const cycleBeats=run.bars*4;
     const cycleIndex=Math.floor(beatNumber/cycleBeats);
-    if(cycleIndex>run.lastCycle) {
+    if(cycleIndex>run.lastCycle){
       const missed=cycleIndex-run.lastCycle;
-      // 長時間スリープ復帰後も行の周期を維持する
-      if(missed>30){activeRow=(activeRow+missed)%ROWS;for(let i=0;i<ROWS;i++)if(i!==activeRow&&!pinned[i])phrases[i]=randomPhrase();redrawPhrases();saveState();}
-      else for(let n=0;n<missed;n++)cycleOnce();
-      run.lastCycle=cycleIndex;
+      if(missed>30){
+        activeRow=(activeRow+missed)%ROWS;
+        for(let i=0;i<ROWS;i++)if(i!==activeRow&&!pinned[i])phrases[i]=randomPhrase();
+        redrawPhrases();saveState();
+      }else for(let n=0;n<missed;n++)cycleOnce();
+      run.lastCycle=cycleIndex;run.lastDisplayBeat=-1;
     }
-    const inCycleBeats=beatNumber%cycleBeats;
-    const bar=Math.floor(inCycleBeats/4)+1;
-    const beat=inCycleBeats%4+1;
-    const secRemaining=(cycleBeats*run.secondsPerBeat)-(elapsed%(cycleBeats*run.secondsPerBeat));
-    const warning=beatNumber>0 && inCycleBeats>=Math.max(0,(run.bars-2)*4);
-    if(run.lastDisplayBeat!==beatNumber) {
+    const inCycleBeats=beatNumber%cycleBeats,bar=Math.floor(inCycleBeats/4)+1,beat=inCycleBeats%4+1;
+    const timeWithin=elapsed%secondsPerCycle,remaining=secondsPerCycle-timeWithin;
+    const warning=!run.paused&&inCycleBeats>=(run.bars-2)*4;
+    if(run.lastDisplayBeat!==beatNumber){
       refs.barDisplay.textContent=String(bar);
       refs.beatDisplay.innerHTML=`${beat} <small>/ 4</small>`;
       refs.dots.forEach((dot,i)=>dot.classList.toggle('on',i===beat-1));
-      markWarning(warning);
-      refs.warning.textContent=warning?'⚠ まもなく次のフレーズに切替':'残り2小節でActive行が点滅';
       run.lastDisplayBeat=beatNumber;
     }
-    refs.countdown.textContent=fmtTime(secRemaining);
-    const pct=Math.min(100,Math.max(0,(elapsed%(cycleBeats*run.secondsPerBeat))/(cycleBeats*run.secondsPerBeat)*100));
-    refs.progressFill.style.width=`${pct}%`; refs.progress.setAttribute('aria-valuenow',String(Math.floor(pct)));
-    run.frame=requestAnimationFrame(showStatus);
+    markWarning(warning);
+    refs.warning.textContent=warning?'⚠ まもなく次のフレーズに切替':run.paused?'PAUSED：Startで続きから再開':'残り2小節でActive行が点滅';
+    refs.countdown.textContent=fmtTime(remaining);
+    const pct=Math.min(100,Math.max(0,timeWithin/secondsPerCycle*100));
+    refs.progressFill.style.width=`${pct}%`;refs.progress.setAttribute('aria-valuenow',String(Math.floor(pct)));
   }
-  async function start() {
-    if(run||starting)return;
-    starting=true; refs.start.disabled=true;
-    let bpm=Math.round(Number(refs.bpm.value));
+  function showStatus(){
+    if(!run||run.paused)return;
+    displayAt(getElapsed());run.frame=requestAnimationFrame(showStatus);
+  }
+  function updateControls(){
+    const started=Boolean(run),paused=Boolean(run?.paused);
+    refs.bpm.disabled=started;refs.bars.disabled=started;
+    refs.start.disabled=starting||(started&&!paused);
+    refs.start.textContent=paused?'▶ Resume':'▶ Start';refs.start.classList.toggle('resume-state',paused);
+    refs.pause.disabled=!started||paused;refs.stop.disabled=!started;
+    refs.runState.textContent=!started?'STOPPED':paused?'Ⅱ PAUSED':'● RUNNING';
+  }
+  async function start(){
+    if(starting||(run&&!run.paused))return;
+    starting=true;updateControls();
+    const previous=run;
+    let bpm=previous?previous.bpm:Math.round(Number(refs.bpm.value));
     if(!Number.isFinite(bpm))bpm=80;
-    bpm=Math.min(300,Math.max(20,bpm));refs.bpm.value=String(bpm);
-    const bars=Number(refs.bars.value)||32;
-    activeRow=0;
-    redrawPhrases();markWarning(false);
+    bpm=Math.max(20,Math.min(300,bpm));refs.bpm.value=String(bpm);
+    const bars=previous?previous.bars:Number(refs.bars.value)||32;
     const AudioContextType=window.AudioContext||window.webkitAudioContext;
     let clock='performance';
     if(AudioContextType){
-      try {
+      try{
         if(!audioCtx)audioCtx=new AudioContextType();
-        if(audioCtx.state!=='running') await audioCtx.resume();
-        if(audioCtx.state==='running') clock='audio';
-      }catch(e){ /* 端末設定・ブラウザ制限時はタイマーで続行 */ }
+        if(audioCtx.state!=='running')await audioCtx.resume();
+        if(audioCtx.state==='running')clock='audio';
+      }catch(e){/* No audio permission: visual mode continues */}
     }
-    if(refs.metro.checked&&clock!=='audio') toast('クリック音が使えません。ブラウザの音声設定を確認してください。');
-    const startTime=(clock==='audio'?audioCtx.currentTime:performance.now()/1000)+.085;
-    run={ bpm,bars,clock,startTime,secondsPerBeat:60/bpm,nextBeatAt:startTime,nextBeatIndex:0,
-      lastCycle:0,lastDisplayBeat:-1,frame:null,scheduler:null,oscillators:new Set()};
-    refs.bpm.disabled=true;refs.bars.disabled=true;refs.start.disabled=true;refs.stop.disabled=false;
-    refs.barTotal.textContent=String(bars);refs.runState.textContent='● RUNNING';saveState();
+    if(refs.metro.checked&&clock!=='audio')toast('音声を利用できません。画面表示だけで練習を続けます。');
+    const now=clock==='audio'?audioCtx.currentTime:performance.now()/1000;
+    if(previous){
+      const elapsed=previous.pausedElapsed;
+      previous.clock=clock;previous.startTime=now+.07-elapsed;previous.paused=false;
+      previous.nextBeatIndex=Math.max(0,Math.ceil(elapsed/previous.secondsPerBeat-.00001));
+      previous.nextBeatAt=previous.startTime+previous.nextBeatIndex*previous.secondsPerBeat;
+      previous.lastDisplayBeat=-1;
+    }else{
+      // Keep the row the user selected instead of always starting from line 1.
+      redrawPhrases();markWarning(false);
+      const startTime=now+.07;
+      run={bpm,bars,clock,startTime,secondsPerBeat:60/bpm,nextBeatIndex:0,nextBeatAt:startTime,
+        lastCycle:0,lastDisplayBeat:-1,paused:false,pausedElapsed:0,frame:null,scheduler:null,oscillators:new Set()};
+    }
+    refs.barTotal.textContent=String(bars);starting=false;redrawPhrases();updateControls();saveState();
     if(clock==='audio'){scheduleAudio();run.scheduler=setInterval(scheduleAudio,25);}
-    starting=false; showStatus();
+    showStatus();
   }
-  function stop() {
+  function pause(){
+    if(!run||run.paused)return;
+    const elapsed=getElapsed();displayAt(elapsed);
+    run.pausedElapsed=elapsed;run.paused=true;
+    stopClock();markWarning(false);redrawPhrases();updateControls();displayAt(elapsed);saveState();
+  }
+  function stop(){
     if(!run)return;
-    if(run.frame!==null)cancelAnimationFrame(run.frame);
-    if(run.scheduler!==null)clearInterval(run.scheduler);
-    for(const osc of run.oscillators){try{osc.onended=null;osc.stop();osc.disconnect();}catch(e){}}
-    run=null;refs.bpm.disabled=false;refs.bars.disabled=false;refs.start.disabled=false;refs.stop.disabled=true;
+    stopClock();run=null;
     refs.barDisplay.textContent='1';refs.beatDisplay.innerHTML='1 <small>/ 4</small>';
     refs.dots.forEach((dot,i)=>dot.classList.toggle('on',i===0));
     refs.countdown.textContent='--:--';refs.progressFill.style.width='0%';refs.progress.setAttribute('aria-valuenow','0');
-    refs.runState.textContent='STOPPED';refs.warning.textContent='残り2小節でActive行が点滅';markWarning(false);
-    saveState();
+    refs.warning.textContent='残り2小節でActive行が点滅';redrawPhrases();markWarning(false);updateControls();saveState();
   }
-  refs.start.addEventListener('click',()=>{start().catch(()=>{starting=false;refs.start.disabled=false;toast('開始できませんでした。再度Startを押してください。');});});
+  refs.start.addEventListener('click',()=>start().catch(()=>{starting=false;updateControls();toast('開始できませんでした。もう一度Startを押してください。');}));
+  refs.pause.addEventListener('click',pause);
   refs.stop.addEventListener('click',stop);
+  refs.reset.addEventListener('click',resetAll);
   document.addEventListener('visibilitychange',()=>{
-    if(document.hidden && run){stop();toast('画面が非表示になったため練習を停止しました');}
+    if(document.hidden&&run&&!run.paused){pause();toast('画面が非表示になったので一時停止しました。Startで再開できます。');}
   });
   refs.phraseList.addEventListener('click',ev=>{
-    const button=ev.target.closest('button[data-save]');if(button)savePhrase(Number(button.dataset.save));
+    const save=ev.target.closest('button[data-save]');
+    if(save){savePhrase(Number(save.dataset.save));return;}
+    const row=ev.target.closest('.phrase-row');
+    if(row)selectStartRow(Number(row.dataset.row));
+  });
+  refs.phraseList.addEventListener('keydown',ev=>{
+    if((ev.key==='Enter'||ev.key===' ')&&ev.target.classList.contains('cells')){
+      ev.preventDefault();selectStartRow(Number(ev.target.closest('.phrase-row')?.dataset.row));
+    }
   });
   refs.libraryList.addEventListener('click',ev=>{
-    const load=ev.target.closest('button[data-load]');const del=ev.target.closest('button[data-delete]');
+    const load=ev.target.closest('button[data-load]'),del=ev.target.closest('button[data-delete]');
     if(load){
       const item=library.find(x=>x.id===load.dataset.load);if(!item)return;
-      const parent=load.closest('.library-item');const target=Number(parent.querySelector('[data-target]').value);
-      if(!Number.isInteger(target)||target<0||target>=ROWS)return;
-      phrases[target]=[...item.phrase];pinned[target]=true;redrawPhrases();saveState();toast(`「${item.name}」を行${target+1}へ読み込み・固定しました`);
+      phrases[3]=[...item.phrase];pinned[3]=true;
+      redrawPhrases();saveState();toast(`「${item.name}」を行4へ読み込み、固定しました。`);
+      if(run&&!run.paused)displayAt(getElapsed());
     }
     if(del){
       const item=library.find(x=>x.id===del.dataset.delete);if(!item)return;
-      if(!confirm(`「${item.name}」をライブラリから削除しますか？\n（現在の練習行には影響しません）`))return;
-      library=library.filter(x=>x.id!==item.id);redrawLibrary();saveState();toast('ライブラリから削除しました');
+      if(!confirm(`「${item.name}」をライブラリから削除しますか？\n（練習中の行には影響しません）`))return;
+      library=library.filter(x=>x.id!==item.id);redrawLibrary();saveState();toast('ライブラリから削除しました。');
     }
   });
   refs.libraryList.addEventListener('change',ev=>{
@@ -439,34 +554,39 @@
     item.name=input.value.trim().slice(0,80)||'無題のフレーズ';input.value=item.name;saveState();
   });
   soundInputs.forEach(el=>el.addEventListener('change',()=>{
-    for(let i=0;i<ROWS;i++)if(i!==activeRow&&!pinned[i])phrases[i]=randomPhrase();
-    redrawPhrases();saveState();
+    if(soundPool().length){for(let i=0;i<ROWS;i++)if(i!==activeRow&&!pinned[i])phrases[i]=randomPhrase();redrawPhrases();}
+    saveState();
   }));
   refs.bpm.addEventListener('change',()=>{
-    let n=Number(refs.bpm.value);if(!Number.isFinite(n))n=80;
+    let n=Number(refs.bpm.value);if(!Number.isFinite(n)||!refs.bpm.value.trim())n=80;
     refs.bpm.value=String(Math.min(300,Math.max(20,Math.round(n))));saveState();
   });
   refs.bars.addEventListener('change',()=>{refs.barTotal.textContent=refs.bars.value;saveState();});
   refs.metro.addEventListener('change',()=>{saveState();toast(refs.metro.checked?'メトロノーム ON':'メトロノーム OFF');});
   $('exportBtn').addEventListener('click',()=>{
-    const data={version:2,exported:new Date().toISOString(),sounds:soundInputs.map(el=>el.value),bpm:Number(refs.bpm.value),bars:Number(refs.bars.value),metro:refs.metro.checked,phrases,pinned,library};
+    const data={...packageState(),exported:new Date().toISOString()};
     const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-    const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`4-sound-lab-backup-${new Date().toISOString().slice(0,10)}.json`;
-    document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('バックアップを書き出しました');
+    const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;
+    a.download=`4-sound-lab-v3.1-backup-${new Date().toISOString().slice(0,10)}.json`;
+    document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);toast('バックアップを保存しました。');
   });
   $('importBtn').addEventListener('click',()=>$('importFile').click());
   $('importFile').addEventListener('change',async ev=>{
     const f=ev.target.files?.[0];if(!f)return;
-    try {
+    try{
+      if(f.size>2*1024*1024)throw Error('too-big');
       const data=JSON.parse(await f.text());
-      if(data.version!==2||!Array.isArray(data.library)||!Array.isArray(data.phrases))throw Error('format');
-      if(!confirm('読み込むと現在のライブラリ・設定・練習フレーズが置き換わります。続けますか？'))return;
-      stop();applyData(data);activeRow=0;redrawPhrases();redrawLibrary();refs.barTotal.textContent=refs.bars.value;saveState();toast('バックアップを読み込みました');
-    }catch(e){toast('読み込めませんでした。専用のJSONバックアップを指定してください。');}
+      if(![2,3].includes(data.version)||!Array.isArray(data.library)||!Array.isArray(data.phrases)||!
+        [3,4].includes(data.phrases.length)||!data.phrases.every(validPhrase))throw Error('format');
+      if(!confirm('現在のライブラリ・設定・4行のフレーズを置き換えます。続けますか？'))return;
+      stop();activeRow=0;applyData(data);redrawPhrases();redrawLibrary();
+      refs.barTotal.textContent=refs.bars.value;saveState();toast('バックアップを読み込みました。');
+    }catch(e){toast('読み込み失敗。4 SOUND LAB v2/v3のJSONバックアップを選んでください。');}
     finally{ev.target.value='';}
   });
-  seed();readState();refs.barTotal.textContent=refs.bars.value;redrawPhrases();redrawLibrary();
-  if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost')){
+  seed();readState();refs.barTotal.textContent=refs.bars.value;
+  redrawPhrases();redrawLibrary();updateControls();
+  if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')){
     navigator.serviceWorker.register('./sw.js').catch(()=>{});
   }
 })();
