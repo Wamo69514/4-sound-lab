@@ -1,0 +1,14 @@
+{
+  "name": "4 SOUND LAB — Scratch Phrase Trainer",
+  "short_name": "4 SOUND LAB",
+  "description": "4音フレーズ練習・メトロノーム・保存ライブラリ",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3f5f7",
+  "theme_color": "#111827",
+  "icons": [
+    {"src":"./icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
+    {"src":"./icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  ]
+}

@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#111827">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="4 SOUND LAB">
+  <meta name="description" content="4音スクラッチフレーズを練習するためのメトロノーム付きトレーナー">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+  <title>4 SOUND LAB — Scratch Phrase Trainer</title>
+  <style>
+    :root { --ink:#101828; --muted:#536176; --line:#d6dce4; --paper:#fff; --canvas:#f3f5f7;
+      --cyan:#13e5e4; --yellow:#fcf329; --red:#ff454a; --blue:#126a83; --shadow:0 5px 24px #14203410; }
+    * { box-sizing:border-box; }
+    html { -webkit-text-size-adjust:100%; }
+    body { margin:0; color:var(--ink); background:var(--canvas);
+      font-family: -apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,system-ui,sans-serif; }
+    button, input, select { font:inherit; }
+    button { cursor:pointer; touch-action:manipulation; }
+    button:focus-visible, input:focus-visible, select:focus-visible { outline:3px solid var(--blue); outline-offset:2px; }
+    button:disabled, select:disabled, input:disabled { cursor:not-allowed; opacity:.57; }
+    .app { width:min(1080px,100%); margin:0 auto; padding:clamp(12px,2.7vw,28px) max(14px,env(safe-area-inset-right)) calc(30px + env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left)); }
+    header { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin:4px 0 22px; }
+    h1 { font-family:Impact,"Arial Black",system-ui,sans-serif; margin:0; font-size:clamp(32px,5vw,52px); line-height:1; letter-spacing:.02em; }
+    .eyebrow { font-size:11px; font-weight:900; letter-spacing:.16em; color:#525f72; margin:0 0 8px; }
+    .header-aside { font-size:12px; font-weight:800; color:#667386; text-align:right; line-height:1.6; white-space:nowrap; }
+    .panel { background:var(--paper); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow); padding:clamp(14px,2vw,22px); margin-bottom:16px; }
+    .panel-heading { display:flex; align-items:baseline; flex-wrap:wrap; justify-content:space-between; gap:6px 12px; margin:0 0 14px; }
+    h2 { font-size:16px; font-weight:950; margin:0; letter-spacing:.045em; }
+    .hint { font-size:12px; color:var(--muted); line-height:1.55; }
+    .sound-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; }
+    .sound-entry label { display:block; font-size:11px; color:#4a5869; font-weight:850; margin:0 0 6px; }
+    .sound-input { min-width:0; width:100%; border:2px solid #222b3c; background:var(--yellow); border-radius:9px; padding:12px 9px; font-weight:850; font-size:clamp(16px,2.9vw,24px); }
+    .controls { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.05fr) minmax(0,1.1fr); gap:12px; align-items:end; }
+    .field label { display:block; font-weight:850; font-size:12px; margin-bottom:7px; }
+    .field-line { position:relative; }
+    .number-input, .bar-select { width:100%; padding:11px 10px; border:2px solid #212b3d; border-radius:9px; min-height:49px; background:#fff; color:var(--ink); font-weight:900; font-size:22px; }
+    .number-input { padding-right:52px; }
+    .unit { position:absolute; right:11px; top:50%; transform:translateY(-50%); font-weight:900; font-size:13px; pointer-events:none; }
+    .bar-select { font-size:18px; }
+    .metro-wrap { display:flex; align-items:center; justify-content:space-between; border:2px solid #212b3d; border-radius:9px; padding:9px 10px; min-height:49px; gap:8px; font-size:14px; font-weight:800; }
+    .metro-wrap input { appearance:none; flex:0 0 49px; width:49px; height:27px; background:#cbd2d9; border-radius:30px; position:relative; margin:0; transition:background .15s; }
+    .metro-wrap input::before { content:""; position:absolute; width:21px; height:21px; border-radius:50%; background:white; top:3px; left:3px; transition:transform .15s; box-shadow:0 1px 3px #0003; }
+    .metro-wrap input:checked { background:#148f95; }
+    .metro-wrap input:checked::before { transform:translateX(22px); }
+    .metro-wrap input:focus-visible { outline:3px solid #126a83; outline-offset:3px; }
+    .actions { display:flex; gap:10px; margin-top:14px; }
+    .primary-btn { display:flex; align-items:center; justify-content:center; gap:8px; flex:1; border:2px solid var(--ink); border-radius:9px; min-height:56px; background:var(--cyan); font-size:20px; font-weight:950; }
+    .primary-btn#stopBtn { flex:.6; background:#fff; }
+    .primary-btn:not(:disabled):active, .save-btn:active { transform:translateY(1px); }
+    .status-grid { display:grid; grid-template-columns: 1fr 1.1fr 1fr; gap:12px; }
+    .metric { padding:12px 16px; border:1px solid #dfe3e9; border-radius:10px; background:#f6f8fa; min-width:0; }
+    .metric-label { font-size:11px; color:#607084; font-weight:900; letter-spacing:.05em; }
+    .metric-value { font-variant-numeric:tabular-nums; font-size:clamp(23px,3.9vw,37px); line-height:1.4; font-weight:950; white-space:nowrap; }
+    .metric-value small { color:#657185; font-size:14px; font-weight:800; }
+    .beat-dots { display:flex; gap:7px; margin-top:6px; }
+    .beat-dot { width:11px; height:11px; background:#d5dce4; border-radius:50%; transition:background .05s; }
+    .beat-dot.on { background:var(--blue); }
+    .beat-dot.downbeat.on { background:var(--red); }
+    .progress { background:#e4e8ee; height:9px; margin-top:16px; border-radius:99px; overflow:hidden; }
+    .progress-fill { background:#137f94; height:100%; width:0%; transition:width .07s linear; }
+    .run-message { display:flex; gap:8px; align-items:center; justify-content:space-between; font-size:12px; margin-top:10px; color:#596779; font-weight:750; }
+    #runState { color:var(--blue); }
+    #warningLabel { color:#b12732; font-weight:950; }
+    .phrase-list { display:grid; gap:12px; }
+    .phrase-row { display:grid; grid-template-columns:105px minmax(0,1fr) 100px; align-items:stretch;
+      border:2px solid #b8c3cc; border-radius:12px; overflow:hidden; background:white; min-height:80px; transition:border-color .15s,box-shadow .15s; }
+    .phrase-row.active { border-color:#e62030; box-shadow:0 0 0 3px #ff454a24; }
+    .save-btn { background:var(--cyan); border:0; border-right:2px solid var(--ink); font-weight:950; font-size:18px; color:var(--ink); padding:8px 4px; }
+    .save-btn small { display:block; font-size:10px; letter-spacing:.04em; opacity:.8; margin-top:4px; }
+    .phrase-row.saved .save-btn { background:#b5f1e4; }
+    .cells { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); min-width:0; }
+    .cell { display:flex; align-items:center; justify-content:center; min-width:0; padding:8px 5px; font-size:clamp(17px,2.7vw,25px); font-weight:900; text-align:center; overflow-wrap:anywhere; border-right:1px solid #d1d7dc; }
+    .active-tag { display:flex; align-items:center; justify-content:center; background:#f3f5f6; font-size:13px; font-weight:950; letter-spacing:.04em; }
+    .phrase-row.active .cell { background:#fff2f2; }
+    .phrase-row.active .active-tag { background:var(--red); color:#201010; }
+    .phrase-row.warning .cell, .phrase-row.warning .active-tag { animation:warning-flash .72s steps(1,end) infinite; }
+    @keyframes warning-flash { 0%, 100% { background:var(--red); color:var(--ink); } 50% { background:#fff; color:var(--ink); } }
+    @media (prefers-reduced-motion:reduce) { .phrase-row.warning .cell, .phrase-row.warning .active-tag { animation:none; background:#ffafad; } }
+    .library-title { display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
+    .count-chip { border-radius:20px; background:#e9edf3; color:#455365; font-size:12px; font-weight:900; padding:4px 9px; }
+    .library-tools { display:flex; flex-wrap:wrap; gap:8px; }
+    .secondary-btn { border:1px solid #a9b5c3; background:#fff; border-radius:7px; color:var(--ink); font-size:12px; font-weight:850; padding:8px 10px; min-height:38px; }
+    .library-empty { color:#617085; font-size:14px; text-align:center; padding:23px 8px 26px; background:#f8f9fb; border-radius:10px; }
+    .library-list { display:grid; gap:9px; max-height:450px; overflow-y:auto; }
+    .library-item { border:1px solid #d6dce5; border-radius:10px; background:#fafbfd; padding:12px; display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:10px; }
+    .library-main { min-width:0; }
+    .library-name { border:1px solid transparent; background:transparent; padding:4px; border-radius:5px; font-weight:900; font-size:14px; width:min(100%,380px); color:var(--ink); }
+    .library-name:focus { background:#fff; border-color:#9ba9bb; }
+    .library-notes { font-size:11px; color:#728094; margin-left:4px; }
+    .library-sounds { display:flex; flex-wrap:wrap; gap:5px; margin-top:7px; }
+    .library-sounds span { background:#fcf7bf; border:1px solid #e5dc6b; border-radius:5px; font-size:13px; font-weight:800; padding:4px 8px; }
+    .library-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; align-items:center; gap:6px; }
+    .library-target { border:1px solid #9daab7; border-radius:7px; background:#fff; padding:7px 4px; font-size:13px; font-weight:800; min-height:37px; }
+    .load-btn { background:var(--cyan); border:1px solid var(--ink); border-radius:7px; padding:7px 10px; min-height:37px; font-weight:900; font-size:13px; }
+    .delete-btn { border:1px solid #d3d9e2; color:#a02132; background:#fff; border-radius:7px; padding:7px 10px; min-height:37px; font-weight:800; font-size:13px; }
+    .footer-note { color:#627083; line-height:1.75; font-size:12px; margin:14px 2px 8px; }
+    .toast { position:fixed; left:50%; bottom:calc(20px + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:30; background:#172335; color:#fff; box-shadow:0 5px 24px #0004; padding:11px 18px; border-radius:9px; font-size:13px; max-width:calc(100% - 36px); font-weight:800; pointer-events:none; }
+    .hidden { display:none !important; }
+    @media (max-width:760px) {
+      header { margin-bottom:17px; } .header-aside { display:none; }
+      .controls { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .status-grid { gap:7px; } .metric { padding:11px 8px; } .metric-value { font-size:clamp(20px,5vw,27px); }
+      .phrase-row { grid-template-columns:86px minmax(0,1fr) 78px; min-height:72px; }
+      .save-btn { font-size:15px; } .active-tag { font-size:11px; }
+      .cell { font-size:clamp(14px,3vw,21px); padding:6px 2px; }
+      .library-item { grid-template-columns:1fr; }
+      .library-actions { justify-content:flex-start; }
+    }
+    @media (max-width:440px) {
+      .app { padding-top:16px; } .panel { padding:13px; border-radius:12px; }
+      .sound-grid { gap:7px; } .sound-input { padding:10px 4px; font-size:15px; }
+      .sound-entry label { font-size:10px; }
+      .phrase-row { grid-template-columns:75px minmax(0,1fr); min-height:0; }
+      .save-btn { min-height:43px; grid-column:1; grid-row:1; border-bottom:1px solid var(--ink); border-right:1px solid var(--ink); }
+      .save-btn small { display:inline; margin-left:4px; font-size:9px; }
+      .active-tag { grid-column:2; grid-row:1; min-height:43px; border-bottom:1px solid #d1d7dc; font-size:12px; }
+      .cells { grid-column:1/-1; grid-row:2; min-height:60px; }
+      .cell { font-size:clamp(16px,4.6vw,21px); }
+      .actions .primary-btn { min-height:52px; } .status-grid { grid-template-columns:1fr 1fr; }
+      .metric:nth-child(3) { grid-column:1/-1; } .metric-value { font-size:27px; }
+      .library-tools { width:100%; }
+      .library-tools .secondary-btn { flex:1; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div>
+        <p class="eyebrow">ONBRAKE / SCRATCH PRACTICE</p>
+        <h1>4 SOUND LAB<span style="color:var(--red)">.</span></h1>
+      </div>
+      <div class="header-aside">FOUR SOUNDS. INFINITE PHRASES.<br>4/4 PRACTICE TOOL</div>
+    </header>
+
+    <section class="panel" aria-labelledby="soundsTitle">
+      <div class="panel-heading"><h2 id="soundsTitle">01 / SOUND INPUT</h2><span class="hint">黄色の枠に、出したい4種類のスクラッチ音を入力</span></div>
+      <div class="sound-grid" id="soundGrid">
+        <div class="sound-entry"><label for="sound0">SOUND 1</label><input id="sound0" class="sound-input" type="text" maxlength="24" value="キュ"></div>
+        <div class="sound-entry"><label for="sound1">SOUND 2</label><input id="sound1" class="sound-input" type="text" maxlength="24" value="キューウ"></div>
+        <div class="sound-entry"><label for="sound2">SOUND 3</label><input id="sound2" class="sound-input" type="text" maxlength="24" value="キュキュ"></div>
+        <div class="sound-entry"><label for="sound3">SOUND 4</label><input id="sound3" class="sound-input" type="text" maxlength="24" value="キュッ"></div>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="transportTitle">
+      <div class="panel-heading"><h2 id="transportTitle">02 / TRANSPORT</h2><span class="hint">4/4拍子・小節数は8の倍数</span></div>
+      <div class="controls">
+        <div class="field"><label for="bpmInput">TEMPO</label><div class="field-line"><input id="bpmInput" class="number-input" type="number" min="20" max="300" step="1" inputmode="numeric" value="80"><span class="unit">BPM</span></div></div>
+        <div class="field"><label for="barSelect">切替までの小節数</label><select id="barSelect" class="bar-select" aria-label="小節数"></select></div>
+        <div class="field" style="grid-column:span 2"><label for="metroToggle">METRONOME</label><label class="metro-wrap" for="metroToggle">クリック音 <input id="metroToggle" type="checkbox" checked aria-label="メトロノームを鳴らす"></label></div>
+      </div>
+      <div class="actions"><button id="startBtn" class="primary-btn" type="button">▶ Start</button><button id="stopBtn" class="primary-btn" type="button" disabled>■ Stop</button></div>
+    </section>
+
+    <section class="panel" aria-label="練習状況">
+      <div class="status-grid">
+        <div class="metric"><div class="metric-label">BAR / 小節</div><div class="metric-value"><span id="barDisplay">1</span><small> / <span id="barTotal">32</span></small></div></div>
+        <div class="metric"><div class="metric-label">BEAT / 拍</div><div class="metric-value" id="beatDisplay">1 <small>/ 4</small></div><div class="beat-dots" id="beatDots" aria-hidden="true"><span class="beat-dot downbeat on"></span><span class="beat-dot"></span><span class="beat-dot"></span><span class="beat-dot"></span></div></div>
+        <div class="metric"><div class="metric-label">NEXT CHANGE</div><div class="metric-value" id="countdown">--:--</div></div>
+      </div>
+      <div class="progress" role="progressbar" aria-label="切替までの進捗" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="run-message"><span id="runState">STOPPED</span><span id="warningLabel" aria-live="polite">残り2小節でActive行が点滅</span></div>
+    </section>
+
+    <section class="panel" aria-labelledby="phraseTitle">
+      <div class="panel-heading"><h2 id="phraseTitle">03 / PHRASES</h2><span class="hint">赤 = 現在のフレーズ ／ Save = 固定してライブラリにも登録</span></div>
+      <div class="phrase-list" id="phraseList"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="libraryTitle">
+      <div class="panel-heading">
+        <div class="library-title"><h2 id="libraryTitle">04 / SAVED LIBRARY</h2><span class="count-chip" id="libraryCount">0 phrases</span></div>
+        <div class="library-tools"><button class="secondary-btn" id="exportBtn" type="button">バックアップを書き出す</button><button class="secondary-btn" id="importBtn" type="button">バックアップを読み込む</button><input id="importFile" type="file" accept="application/json,.json" class="hidden" aria-label="バックアップJSON"></div>
+      </div>
+      <div class="library-empty" id="libraryEmpty">Saveしたフレーズがここにたまります。<br>名前を付けて、いつでも好きな行へ読み込めます。</div>
+      <div class="library-list" id="libraryList"></div>
+    </section>
+    <p class="footer-note">Activeは 1 → 2 → 3 の順に移動し、切替時にActive以外の未固定フレーズだけを再生成します。Saveを解除してもライブラリには残ります。データはこのブラウザ内に保存され、端末間では自動同期しません。画面ロック・バックグラウンド中は、iPhone/iPadの制限によりメトロノームが止まる場合があります。</p>
+  </main>
+  <div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
+<script>
+(() => {
+  'use strict';
+  const ROWS = 3, SLOTS = 4, STORE_KEY = 'onbrake-4-sound-lab-v2', MAX_LIBRARY = 500;
+  const $ = id => document.getElementById(id);
+  const soundInputs = Array.from(document.querySelectorAll('.sound-input'));
+  const refs = {
+    phraseList:$('phraseList'), libraryList:$('libraryList'), libraryEmpty:$('libraryEmpty'),
+    libraryCount:$('libraryCount'), bpm:$('bpmInput'), bars:$('barSelect'), metro:$('metroToggle'),
+    start:$('startBtn'), stop:$('stopBtn'), barDisplay:$('barDisplay'), barTotal:$('barTotal'),
+    beatDisplay:$('beatDisplay'), countdown:$('countdown'), runState:$('runState'),
+    warning:$('warningLabel'), progress:$('progress'), progressFill:$('progressFill'),
+    dots:[...document.querySelectorAll('.beat-dot')], toast:$('toast')
+  };
+  for (let bars=8; bars<=128; bars+=8) {
+    const option=document.createElement('option'); option.value=String(bars); option.textContent=`${bars} 小節`;
+    if (bars===32) option.selected=true;
+    refs.bars.append(option);
+  }
+  let phrases=[], pinned=[false,false,false], activeRow=0, library=[];
+  let run=null, starting=false, audioCtx=null, toastTimer=null, persistWarningShown=false;
+
+  const sounds = () => soundInputs.map(el=>el.value.trim()).filter(Boolean);
+  const choose = arr => arr[Math.floor(Math.random()*arr.length)] || '';
+  const randomPhrase = () => Array.from({length:SLOTS},()=>choose(sounds()));
+  const validPhrase = a => Array.isArray(a)&&a.length===4&&a.every(s=>typeof s==='string'&&s.length<=100);
+  const equalPhrase = (a,b) => a.every((s,i)=>s===b[i]);
+  const safeId = () => (typeof crypto!=='undefined'&&typeof crypto.randomUUID==='function') ? crypto.randomUUID() : String(Date.now())+'-'+Math.random().toString(36).slice(2);
+  const fmtTime = seconds => {
+    const s=Math.max(0,Math.ceil(seconds));
+    return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+  };
+  function toast(msg) {
+    if (toastTimer) clearTimeout(toastTimer);
+    refs.toast.textContent=msg; refs.toast.classList.remove('hidden');
+    toastTimer=setTimeout(()=>refs.toast.classList.add('hidden'),3300);
+  }
+  function saveState() {
+    try {
+      localStorage.setItem(STORE_KEY,JSON.stringify({version:2, sounds:soundInputs.map(el=>el.value), bpm:Number(refs.bpm.value), bars:Number(refs.bars.value), metro:refs.metro.checked, phrases, pinned, library}));
+    } catch(e) { if(!persistWarningShown){toast('保存できません。Safariの通常タブで開くかバックアップを書き出してください。');persistWarningShown=true;} }
+  }
+  function applyData(data) {
+    if (!data || typeof data!=='object') return false;
+    if (Array.isArray(data.sounds)&&data.sounds.length===4) data.sounds.forEach((s,i)=>{if(typeof s==='string')soundInputs[i].value=s.slice(0,24);});
+    if (Number.isFinite(Number(data.bpm))) refs.bpm.value=String(Math.min(300,Math.max(20,Math.round(Number(data.bpm)))));
+    if (Number.isInteger(Number(data.bars))&&Number(data.bars)>=8&&Number(data.bars)<=128&&Number(data.bars)%8===0) refs.bars.value=String(data.bars);
+    if (typeof data.metro==='boolean') refs.metro.checked=data.metro;
+    if (Array.isArray(data.phrases)&&data.phrases.length===ROWS&&data.phrases.every(validPhrase)) phrases=data.phrases.map(p=>[...p]);
+    if (Array.isArray(data.pinned)&&data.pinned.length===ROWS) pinned=data.pinned.map(Boolean);
+    if (Array.isArray(data.library)) {
+      library=data.library.slice(0,MAX_LIBRARY).filter(item=>item&&validPhrase(item.phrase)).map(item=>({
+        id:typeof item.id==='string' ? item.id : safeId(),
+        name:typeof item.name==='string' ? item.name.slice(0,80) : '保存フレーズ',
+        phrase:[...item.phrase],
+        created: typeof item.created==='string'?item.created:new Date().toISOString()
+      }));
+    }
+    return true;
+  }
+  function readState() {
+    try { const raw=localStorage.getItem(STORE_KEY); if(raw) applyData(JSON.parse(raw)); } catch(e) { /* 保存不可環境でもアプリ自体は使える */ }
+  }
+  function seed() {
+    const a=sounds();
+    phrases=[Array(4).fill(a[0]||'キュ'), Array(4).fill(a[1]||a[0]||'キューウ'), [a[1]||'キューウ',a[0]||'キュ',a[0]||'キュ',a[1]||'キューウ']];
+  }
+  function redrawPhrases() {
+    const fragment=document.createDocumentFragment();
+    phrases.forEach((phrase,i)=>{
+      const row=document.createElement('div');
+      row.className=`phrase-row${i===activeRow?' active':''}${pinned[i]?' saved':''}`;
+      row.dataset.row=String(i);
+      const btn=document.createElement('button');
+      btn.type='button'; btn.className='save-btn'; btn.dataset.save=String(i);
+      btn.setAttribute('aria-pressed',String(pinned[i]));
+      btn.setAttribute('aria-label',`行${i+1}を${pinned[i]?'固定解除':'保存して固定'}`);
+      btn.textContent=pinned[i]?'Saved':'Save';
+      const small=document.createElement('small');small.textContent=pinned[i]?' 🔒':` #${i+1}`;btn.append(small);
+      const cells=document.createElement('div');cells.className='cells';
+      phrase.forEach(s=>{const cell=document.createElement('div');cell.className='cell';cell.textContent=s||'—';cells.append(cell);});
+      const tag=document.createElement('div');tag.className='active-tag';tag.textContent=i===activeRow?'● ACTIVE':`LINE 0${i+1}`;
+      row.append(btn,cells,tag);fragment.append(row);
+    });
+    refs.phraseList.replaceChildren(fragment);
+  }
+  function redrawLibrary() {
+    refs.libraryCount.textContent=`${library.length} phrases`;
+    refs.libraryEmpty.classList.toggle('hidden',library.length>0);
+    const fragment=document.createDocumentFragment();
+    for (const item of library) {
+      const node=document.createElement('article');node.className='library-item';node.dataset.id=item.id;
+      const main=document.createElement('div');main.className='library-main';
+      const title=document.createElement('input');title.className='library-name';title.type='text';title.maxLength=80;title.value=item.name;title.setAttribute('aria-label','フレーズの名前');title.dataset.rename=item.id;
+      const date=document.createElement('span');date.className='library-notes';
+      const dt=new Date(item.created);date.textContent=Number.isNaN(dt.valueOf())?'':dt.toLocaleDateString('ja-JP');
+      const line=document.createElement('div');line.append(title,date);
+      const tags=document.createElement('div');tags.className='library-sounds';
+      for(const s of item.phrase){const tag=document.createElement('span');tag.textContent=s||'—';tags.append(tag);}
+      main.append(line,tags);
+      const actions=document.createElement('div');actions.className='library-actions';
+      const target=document.createElement('select');target.className='library-target';target.dataset.target=item.id;
+      target.setAttribute('aria-label','読み込み先の行');
+      for(let i=0;i<ROWS;i++){const opt=document.createElement('option');opt.value=String(i);opt.textContent=`行 ${i+1}`;target.append(opt);}
+      target.value=String(activeRow);
+      const load=document.createElement('button');load.type='button';load.className='load-btn';load.dataset.load=item.id;load.textContent='読み込む';
+      const del=document.createElement('button');del.type='button';del.className='delete-btn';del.dataset.delete=item.id;del.textContent='削除';
+      actions.append(target,load,del);node.append(main,actions);fragment.append(node);
+    }
+    refs.libraryList.replaceChildren(fragment);
+  }
+  function savePhrase(i) {
+    if (pinned[i]) { pinned[i]=false; toast(`行${i+1}の固定を解除しました（ライブラリには残ります）`); }
+    else {
+      pinned[i]=true;
+      let found=library.find(item=>equalPhrase(item.phrase,phrases[i]));
+      if (!found && library.length<MAX_LIBRARY) {
+        const num=library.length+1;
+        found={id:safeId(),name:`フレーズ ${String(num).padStart(2,'0')}`,phrase:[...phrases[i]],created:new Date().toISOString()};
+        library.unshift(found);
+        redrawLibrary();toast(`行${i+1}を固定・ライブラリに登録しました`);
+      } else if (found) toast(`行${i+1}を固定しました（同じフレーズは登録済みです）`);
+      else toast('ライブラリの上限500件です。先に不要なものを削除してください。');
+    }
+    redrawPhrases();saveState();
+  }
+  function cycleOnce() {
+    activeRow=(activeRow+1)%ROWS;
+    for(let i=0;i<ROWS;i++) if(i!==activeRow&&!pinned[i]) phrases[i]=randomPhrase();
+    redrawPhrases(); saveState();
+  }
+  function markWarning(isWarning) {
+    const active=refs.phraseList.querySelector('.phrase-row.active');
+    if(active) active.classList.toggle('warning',isWarning);
+  }
+  function getClock() {return (run && run.clock==='audio' && audioCtx && audioCtx.state==='running')?audioCtx.currentTime:performance.now()/1000;}
+  function clickAt(time, downbeat) {
+    if (!audioCtx||audioCtx.state!=='running') return;
+    const osc=audioCtx.createOscillator();const gain=audioCtx.createGain();
+    osc.type='sine';osc.frequency.setValueAtTime(downbeat?1160:790,time);
+    gain.gain.setValueAtTime(0.0001,time);
+    gain.gain.exponentialRampToValueAtTime(downbeat?0.21:0.12,time+.003);
+    gain.gain.exponentialRampToValueAtTime(0.0001,time+.047);
+    osc.connect(gain);gain.connect(audioCtx.destination);
+    if(run) run.oscillators.add(osc);
+    osc.onended=()=>{try{osc.disconnect();gain.disconnect();}catch(e){} if(run)run.oscillators.delete(osc);};
+    osc.start(time);osc.stop(time+.052);
+  }
+  function scheduleAudio() {
+    if (!run||run.clock!=='audio') return;
+    const current=audioCtx.currentTime;
+    while(run.nextBeatAt<=current+.115) {
+      const when=Math.max(run.nextBeatAt,current+.002);
+      if (refs.metro.checked && run.nextBeatAt>=current-.04) clickAt(when,run.nextBeatIndex%4===0);
+      run.nextBeatIndex++;run.nextBeatAt=run.startTime+run.nextBeatIndex*run.secondsPerBeat;
+    }
+  }
+  function showStatus() {
+    if(!run)return;
+    const now=getClock();
+    const elapsed=Math.max(0,now-run.startTime);
+    const beatNumber=Math.floor(elapsed/run.secondsPerBeat);
+    const cycleBeats=run.bars*4;
+    const cycleIndex=Math.floor(beatNumber/cycleBeats);
+    if(cycleIndex>run.lastCycle) {
+      const missed=cycleIndex-run.lastCycle;
+      // 長時間スリープ復帰後も行の周期を維持する
+      if(missed>30){activeRow=(activeRow+missed)%ROWS;for(let i=0;i<ROWS;i++)if(i!==activeRow&&!pinned[i])phrases[i]=randomPhrase();redrawPhrases();saveState();}
+      else for(let n=0;n<missed;n++)cycleOnce();
+      run.lastCycle=cycleIndex;
+    }
+    const inCycleBeats=beatNumber%cycleBeats;
+    const bar=Math.floor(inCycleBeats/4)+1;
+    const beat=inCycleBeats%4+1;
+    const secRemaining=(cycleBeats*run.secondsPerBeat)-(elapsed%(cycleBeats*run.secondsPerBeat));
+    const warning=beatNumber>0 && inCycleBeats>=Math.max(0,(run.bars-2)*4);
+    if(run.lastDisplayBeat!==beatNumber) {
+      refs.barDisplay.textContent=String(bar);
+      refs.beatDisplay.innerHTML=`${beat} <small>/ 4</small>`;
+      refs.dots.forEach((dot,i)=>dot.classList.toggle('on',i===beat-1));
+      markWarning(warning);
+      refs.warning.textContent=warning?'⚠ まもなく次のフレーズに切替':'残り2小節でActive行が点滅';
+      run.lastDisplayBeat=beatNumber;
+    }
+    refs.countdown.textContent=fmtTime(secRemaining);
+    const pct=Math.min(100,Math.max(0,(elapsed%(cycleBeats*run.secondsPerBeat))/(cycleBeats*run.secondsPerBeat)*100));
+    refs.progressFill.style.width=`${pct}%`; refs.progress.setAttribute('aria-valuenow',String(Math.floor(pct)));
+    run.frame=requestAnimationFrame(showStatus);
+  }
+  async function start() {
+    if(run||starting)return;
+    starting=true; refs.start.disabled=true;
+    let bpm=Math.round(Number(refs.bpm.value));
+    if(!Number.isFinite(bpm))bpm=80;
+    bpm=Math.min(300,Math.max(20,bpm));refs.bpm.value=String(bpm);
+    const bars=Number(refs.bars.value)||32;
+    activeRow=0;
+    redrawPhrases();markWarning(false);
+    const AudioContextType=window.AudioContext||window.webkitAudioContext;
+    let clock='performance';
+    if(AudioContextType){
+      try {
+        if(!audioCtx)audioCtx=new AudioContextType();
+        if(audioCtx.state!=='running') await audioCtx.resume();
+        if(audioCtx.state==='running') clock='audio';
+      }catch(e){ /* 端末設定・ブラウザ制限時はタイマーで続行 */ }
+    }
+    if(refs.metro.checked&&clock!=='audio') toast('クリック音が使えません。ブラウザの音声設定を確認してください。');
+    const startTime=(clock==='audio'?audioCtx.currentTime:performance.now()/1000)+.085;
+    run={ bpm,bars,clock,startTime,secondsPerBeat:60/bpm,nextBeatAt:startTime,nextBeatIndex:0,
+      lastCycle:0,lastDisplayBeat:-1,frame:null,scheduler:null,oscillators:new Set()};
+    refs.bpm.disabled=true;refs.bars.disabled=true;refs.start.disabled=true;refs.stop.disabled=false;
+    refs.barTotal.textContent=String(bars);refs.runState.textContent='● RUNNING';saveState();
+    if(clock==='audio'){scheduleAudio();run.scheduler=setInterval(scheduleAudio,25);}
+    starting=false; showStatus();
+  }
+  function stop() {
+    if(!run)return;
+    if(run.frame!==null)cancelAnimationFrame(run.frame);
+    if(run.scheduler!==null)clearInterval(run.scheduler);
+    for(const osc of run.oscillators){try{osc.onended=null;osc.stop();osc.disconnect();}catch(e){}}
+    run=null;refs.bpm.disabled=false;refs.bars.disabled=false;refs.start.disabled=false;refs.stop.disabled=true;
+    refs.barDisplay.textContent='1';refs.beatDisplay.innerHTML='1 <small>/ 4</small>';
+    refs.dots.forEach((dot,i)=>dot.classList.toggle('on',i===0));
+    refs.countdown.textContent='--:--';refs.progressFill.style.width='0%';refs.progress.setAttribute('aria-valuenow','0');
+    refs.runState.textContent='STOPPED';refs.warning.textContent='残り2小節でActive行が点滅';markWarning(false);
+    saveState();
+  }
+  refs.start.addEventListener('click',()=>{start().catch(()=>{starting=false;refs.start.disabled=false;toast('開始できませんでした。再度Startを押してください。');});});
+  refs.stop.addEventListener('click',stop);
+  document.addEventListener('visibilitychange',()=>{
+    if(document.hidden && run){stop();toast('画面が非表示になったため練習を停止しました');}
+  });
+  refs.phraseList.addEventListener('click',ev=>{
+    const button=ev.target.closest('button[data-save]');if(button)savePhrase(Number(button.dataset.save));
+  });
+  refs.libraryList.addEventListener('click',ev=>{
+    const load=ev.target.closest('button[data-load]');const del=ev.target.closest('button[data-delete]');
+    if(load){
+      const item=library.find(x=>x.id===load.dataset.load);if(!item)return;
+      const parent=load.closest('.library-item');const target=Number(parent.querySelector('[data-target]').value);
+      if(!Number.isInteger(target)||target<0||target>=ROWS)return;
+      phrases[target]=[...item.phrase];pinned[target]=true;redrawPhrases();saveState();toast(`「${item.name}」を行${target+1}へ読み込み・固定しました`);
+    }
+    if(del){
+      const item=library.find(x=>x.id===del.dataset.delete);if(!item)return;
+      if(!confirm(`「${item.name}」をライブラリから削除しますか？\n（現在の練習行には影響しません）`))return;
+      library=library.filter(x=>x.id!==item.id);redrawLibrary();saveState();toast('ライブラリから削除しました');
+    }
+  });
+  refs.libraryList.addEventListener('change',ev=>{
+    const input=ev.target.closest('[data-rename]');if(!input)return;
+    const item=library.find(x=>x.id===input.dataset.rename);if(!item)return;
+    item.name=input.value.trim().slice(0,80)||'無題のフレーズ';input.value=item.name;saveState();
+  });
+  soundInputs.forEach(el=>el.addEventListener('change',()=>{
+    for(let i=0;i<ROWS;i++)if(i!==activeRow&&!pinned[i])phrases[i]=randomPhrase();
+    redrawPhrases();saveState();
+  }));
+  refs.bpm.addEventListener('change',()=>{
+    let n=Number(refs.bpm.value);if(!Number.isFinite(n))n=80;
+    refs.bpm.value=String(Math.min(300,Math.max(20,Math.round(n))));saveState();
+  });
+  refs.bars.addEventListener('change',()=>{refs.barTotal.textContent=refs.bars.value;saveState();});
+  refs.metro.addEventListener('change',()=>{saveState();toast(refs.metro.checked?'メトロノーム ON':'メトロノーム OFF');});
+  $('exportBtn').addEventListener('click',()=>{
+    const data={version:2,exported:new Date().toISOString(),sounds:soundInputs.map(el=>el.value),bpm:Number(refs.bpm.value),bars:Number(refs.bars.value),metro:refs.metro.checked,phrases,pinned,library};
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`4-sound-lab-backup-${new Date().toISOString().slice(0,10)}.json`;
+    document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('バックアップを書き出しました');
+  });
+  $('importBtn').addEventListener('click',()=>$('importFile').click());
+  $('importFile').addEventListener('change',async ev=>{
+    const f=ev.target.files?.[0];if(!f)return;
+    try {
+      const data=JSON.parse(await f.text());
+      if(data.version!==2||!Array.isArray(data.library)||!Array.isArray(data.phrases))throw Error('format');
+      if(!confirm('読み込むと現在のライブラリ・設定・練習フレーズが置き換わります。続けますか？'))return;
+      stop();applyData(data);activeRow=0;redrawPhrases();redrawLibrary();refs.barTotal.textContent=refs.bars.value;saveState();toast('バックアップを読み込みました');
+    }catch(e){toast('読み込めませんでした。専用のJSONバックアップを指定してください。');}
+    finally{ev.target.value='';}
+  });
+  seed();readState();refs.barTotal.textContent=refs.bars.value;redrawPhrases();redrawLibrary();
+  if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost')){
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  }
+})();
+</script>
+</body>
+</html>
