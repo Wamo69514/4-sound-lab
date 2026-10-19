@@ -173,6 +173,26 @@
       .actions .primary-btn { min-height:50px; font-size:17px; }
       .library-actions .load-btn { flex:1; }
     }
+    /* v5: two linked sounds are one non-breakable phrase unit */
+    .pair-panel { margin-top:16px; border:1px solid #bdcad8; background:#f1f6fc; padding:13px 14px; border-radius:12px; }
+    .pair-head { display:flex; flex-wrap:wrap; gap:5px 14px; align-items:baseline; justify-content:space-between; margin-bottom:12px; }
+    .pair-head strong { font-size:13px; letter-spacing:.02em; }
+    .pair-grid { display:grid; grid-template-columns:minmax(0,1fr) 28px minmax(0,1fr); align-items:end; gap:7px; }
+    .pair-input { background:#e6d6ff; border-color:#5d427f; }
+    .pair-input:placeholder-shown { background:#f5effe; }
+    .pair-arrow { font-size:24px; font-weight:900; color:#674a94; text-align:center; padding-bottom:11px; }
+    .pair-status { font-size:12px; color:#4e5972; margin:10px 0 0; line-height:1.5; }
+    .pair-status.enabled { color:#593389; font-weight:850; }
+    .cell.pair-first .phrase-slot-input, .cell.pair-second .phrase-slot-input { background:#f0e4ff; }
+    .phrase-row.active .cell.pair-first .phrase-slot-input, .phrase-row.active .cell.pair-second .phrase-slot-input { background:#e9d7ff; }
+    .cell.pair-first { box-shadow:inset 0 3px 0 #9670d3; }
+    .cell.pair-second { box-shadow:inset 0 3px 0 #9670d3; }
+    .cell.pair-first::after { content:'↗'; position:absolute; right:1px; top:0; font-size:11px; color:#64449b; pointer-events:none; }
+    @media(max-width:440px) {
+      .pair-grid { grid-template-columns:minmax(0,1fr) 20px minmax(0,1fr); gap:4px; }
+      .pair-input { font-size:17px; }
+      .pair-arrow { font-size:20px; }
+    }
   </style>
 </head>
 <body>
@@ -180,13 +200,13 @@
     <header>
       <div>
         <p class="eyebrow">ONBRAKE / SCRATCH PRACTICE</p>
-        <h1>4 SOUND LAB<span style="color:var(--red)">.</span><span class="version-label">v4.0</span></h1>
+        <h1>4 SOUND LAB<span style="color:var(--red)">.</span><span class="version-label">v5.0</span></h1>
       </div>
-      <div class="header-aside">EIGHT INPUTS. INFINITE PHRASES.<br>4/4 PRACTICE TOOL</div>
+      <div class="header-aside">EIGHT SOUNDS + LINKED PAIR.<br>4/4 PRACTICE TOOL</div>
     </header>
 
     <section class="panel" aria-labelledby="soundsTitle">
-      <div class="panel-heading"><h2 id="soundsTitle">01 / SOUND INPUT</h2><span class="hint">最大8種類の音を入力。空欄（NULL）は抽選対象外</span></div>
+      <div class="panel-heading"><h2 id="soundsTitle">01 / SOUND INPUT</h2><span class="hint">単音は最大8種類。空欄（NULL）は除外。下の連結ペアは必ず2音連続</span></div>
       <div class="sound-grid" id="soundGrid">
         <div class="sound-entry"><label for="sound0">SOUND 1</label><input id="sound0" class="sound-input" type="text" maxlength="24" value="キュ" placeholder="NULL" aria-label="スクラッチ音1"></div>
         <div class="sound-entry"><label for="sound1">SOUND 2</label><input id="sound1" class="sound-input" type="text" maxlength="24" value="キューウ" placeholder="NULL" aria-label="スクラッチ音2"></div>
@@ -196,6 +216,15 @@
         <div class="sound-entry"><label for="sound5">SOUND 6</label><input id="sound5" class="sound-input" type="text" maxlength="24" value="" placeholder="NULL" aria-label="スクラッチ音6"></div>
         <div class="sound-entry"><label for="sound6">SOUND 7</label><input id="sound6" class="sound-input" type="text" maxlength="24" value="" placeholder="NULL" aria-label="スクラッチ音7"></div>
         <div class="sound-entry"><label for="sound7">SOUND 8</label><input id="sound7" class="sound-input" type="text" maxlength="24" value="" placeholder="NULL" aria-label="スクラッチ音8"></div>
+      </div>
+      <div class="pair-panel" aria-labelledby="pairTitle">
+        <div class="pair-head"><strong id="pairTitle">🔗 LINKED PAIR / 連結する2音</strong><span class="hint">どちらも入力すると有効。ペアは切り離さず、4音目からは始まりません。</span></div>
+        <div class="pair-grid">
+          <div class="sound-entry"><label for="pairFirst">PAIR 1 / 必ず先に鳴る音</label><input id="pairFirst" class="sound-input pair-input" type="text" maxlength="24" value="" placeholder="例：キュ" aria-label="ペアの先頭音"></div>
+          <div class="pair-arrow" aria-hidden="true">→</div>
+          <div class="sound-entry"><label for="pairSecond">PAIR 2 / 必ず次に鳴る音</label><input id="pairSecond" class="sound-input pair-input" type="text" maxlength="24" value="" placeholder="例：ウ" aria-label="ペアの後続音"></div>
+        </div>
+        <p id="pairStatus" class="pair-status" aria-live="polite">ペアは未設定。通常の8音のみから生成します。</p>
       </div>
     </section>
 
@@ -213,7 +242,7 @@
           <button id="semiModeBtn" class="mode-btn" type="button" aria-pressed="false">🔁 半ランダム（1音ずつ）</button>
           <button id="semiGenerateBtn" class="semi-generate-btn" type="button">1行目から生成 ↗</button>
         </div>
-        <p id="modeNote" class="mode-note">完全ランダム：従来どおり、各音を独立して抽選します。</p>
+        <p id="modeNote" class="mode-note">完全ランダム：単音は独立抽選。連結ペアだけは2音一緒に並びます。</p>
       </div>
       <div class="actions">
         <button id="startBtn" class="primary-btn" type="button">▶ Start</button>
@@ -234,7 +263,7 @@
     </section>
 
     <section class="panel" aria-labelledby="phraseTitle">
-      <div class="panel-heading"><h2 id="phraseTitle">03 / PHRASES</h2><span class="hint">4音のマスをタップして編集 ／ 行右端のLINE/STARTで開始位置を選択 ／ Saveで保存・固定 ／ 水色の下線 = 変化した音</span></div>
+      <div class="panel-heading"><h2 id="phraseTitle">03 / PHRASES</h2><span class="hint">4音のマスをタップして編集 ／ 紫色 = 連結ペア ／ LINE/STARTで開始行選択 ／ Saveで固定</span></div>
       <div class="phrase-list" id="phraseList"></div>
     </section>
 
@@ -246,13 +275,13 @@
       <div class="library-empty" id="libraryEmpty">Saveしたフレーズがここにたまります。<br>「読み込む」で必ず4行目へ挿入・固定します。</div>
       <div class="library-list" id="libraryList"></div>
     </section>
-    <p class="footer-note">4音のマスをタップすると直接編集できます（編集中の行がSavedなら固定だけ解除、元のライブラリは変更しません）。開始行は右端のLINE/STARTボタンで選択します（再生中はPause/Stop後）。完全ランダムは従来どおり。半ランダムは1行目を種に2→3→4行目をそれぞれ直前の行から1音だけ変えて用意し、4→1へ戻るたびに1音変化させて循環します。「1行目から生成」で再作成、「Start」で選択中のモードを開始します。変える音が他にない場合、同じ音のままです。Saveした行は固定優先なので1音差にならない場合があります。Saveは押した行だけをライブラリ保存・固定、読み込み先は4行目。Resetは全行を再生成・固定解除しますが、ライブラリは消しません。Pauseは続きから再開できます。データは端末内に保存され、自動同期しません。iOSの画面ロック・バックグラウンド中はメトロノームが停止する場合があります。</p>
+    <p class="footer-note">ペア音は「1音目→2音目」の隣接セットで出現し、1音目だけが4音目に来ることはありません。通常INPUTに同じ文字があればペア専用として扱います。両方入力で有効、同じ文字同士のペアは無効です。半ランダムは原則1枠ずつ変化、ペアの挿入・削除時だけ2枠をまとめて変更します。4音のマスをタップすると直接編集できます（編集中の行がSavedなら固定だけ解除、元のライブラリは変更しません）。開始行は右端のLINE/STARTボタンで選択します（再生中はPause/Stop後）。完全ランダムは従来どおり。半ランダムは1行目を種に2→3→4行目をそれぞれ直前の行から1音だけ変えて用意し、4→1へ戻るたびに1音変化させて循環します。「1行目から生成」で再作成、「Start」で選択中のモードを開始します。変える音が他にない場合、同じ音のままです。Saveした行は固定優先なので1音差にならない場合があります。Saveは押した行だけをライブラリ保存・固定、読み込み先は4行目。Resetは全行を再生成・固定解除しますが、ライブラリは消しません。Pauseは続きから再開できます。データは端末内に保存され、自動同期しません。iOSの画面ロック・バックグラウンド中はメトロノームが停止する場合があります。</p>
   </main>
   <div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
 <script>
 (() => {
   'use strict';
-  const ROWS=4, SLOTS=4, INPUTS=8, STORE_KEY='onbrake-4-sound-lab-v4', LEGACY_KEYS=['onbrake-4-sound-lab-v3','onbrake-4-sound-lab-v2'], MAX_LIBRARY=500;
+  const ROWS=4, SLOTS=4, INPUTS=8, STORE_KEY='onbrake-4-sound-lab-v5', LEGACY_KEYS=['onbrake-4-sound-lab-v4','onbrake-4-sound-lab-v3','onbrake-4-sound-lab-v2'], MAX_LIBRARY=500;
   const $=id=>document.getElementById(id);
   const soundInputs=[...document.querySelectorAll('.sound-input')];
   const refs={
@@ -262,6 +291,7 @@
     randomMode:$('randomModeBtn'),semiMode:$('semiModeBtn'),semiGenerate:$('semiGenerateBtn'),modeNote:$('modeNote'),
     barDisplay:$('barDisplay'), barTotal:$('barTotal'), beatDisplay:$('beatDisplay'),
     countdown:$('countdown'), runState:$('runState'),warning:$('warningLabel'),
+    pairFirst:$('pairFirst'),pairSecond:$('pairSecond'),pairStatus:$('pairStatus'),
     progress:$('progress'), progressFill:$('progressFill'),
     dots:[...document.querySelectorAll('.beat-dot')],toast:$('toast')
   };
@@ -272,22 +302,106 @@
   let phrases=[],pinned=Array(ROWS).fill(false),activeRow=0,library=[],mode='random',semiPrepared=false;
   let run=null,starting=false,audioCtx=null,toastTimer=null,persistWarningShown=false;
 
-  function soundPool(){return soundInputs.map(el=>el.value.trim()).filter(Boolean);}
-  function randomPhrase(pool=soundPool()){
-    return Array.from({length:SLOTS},()=>pool.length?pool[Math.floor(Math.random()*pool.length)]:'');
+  function pairConfig(){
+    const first=refs.pairFirst.value.trim(),second=refs.pairSecond.value.trim();
+    return first&&second&&first!==second?[first,second]:null;
   }
-  // In semi mode, pick exactly one POSITION and replace it with a different input sound.
-  // Empty inputs are ignored. If no alternative exists, return an unchanged copy.
-  function evolveOne(previous,pool=soundPool()){
-    const eligible=[];
-    for(let j=0;j<SLOTS;j++){
-      const alternatives=pool.filter(s=>s!==previous[j]);
-      if(alternatives.length)eligible.push({j,alternatives});
+  // When a pair is active, matching spellings in the ordinary INPUTS are
+  // reserved for the pair. This prevents a standalone PAIR 1 at beat 4.
+  function soundPool(){
+    const pair=pairConfig();
+    return soundInputs.map(el=>el.value.trim()).filter(s=>s&&(!pair||(s!==pair[0]&&s!==pair[1])));
+  }
+  function hasCandidates(){return soundPool().length>0||Boolean(pairConfig());}
+  function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+  function randomPhrase(pool=soundPool()){
+    const pair=pairConfig(),result=[];
+    while(result.length<SLOTS){
+      const remaining=SLOTS-result.length;
+      if(pair&&remaining>=2&&(!pool.length||Math.random()<1/(pool.length+1))){result.push(...pair);continue;}
+      result.push(pool.length?pick(pool):'');
     }
-    if(!eligible.length)return [...previous];
-    const picked=eligible[Math.floor(Math.random()*eligible.length)];
-    const next=[...previous];
-    next[picked.j]=picked.alternatives[Math.floor(Math.random()*picked.alternatives.length)];
+    return result;
+  }
+  function pairStarts(phrase,pair=pairConfig()){
+    if(!pair)return [];
+    const result=[];
+    for(let j=0;j<SLOTS;j++)if(phrase[j]===pair[0]&&j<SLOTS-1&&phrase[j+1]===pair[1]){
+      result.push(j);j++;
+    }
+    return result;
+  }
+  function validPairPhrase(phrase,pair=pairConfig()){
+    if(!pair)return true;
+    for(let j=0;j<SLOTS;j++){
+      if(phrase[j]===pair[0]){
+        if(j===SLOTS-1||phrase[j+1]!==pair[1])return false;
+        j++;
+      }else if(phrase[j]===pair[1])return false;
+    }
+    return true;
+  }
+  // Text fields don't carry token metadata, so normalize any orphaned pair
+  // text after an edit or setting change while preserving complete pairs.
+  function repairPhrase(phrase,pool=soundPool()){
+    const pair=pairConfig(),copy=[...phrase];
+    if(!pair)return copy;
+    for(let j=0;j<SLOTS;j++){
+      if(copy[j]===pair[0]&&j<SLOTS-1&&copy[j+1]===pair[1]){j++;continue;}
+      if(copy[j]===pair[0]||copy[j]===pair[1])copy[j]=pool[0]||'';
+    }
+    return copy;
+  }
+  function normalizeWorkingPhrases(){
+    let corrected=0;
+    for(let i=0;i<ROWS;i++){
+      const safe=repairPhrase(phrases[i]);
+      if(!equalPhrase(phrases[i],safe)){
+        phrases[i]=safe;pinned[i]=false;corrected++;
+      }
+    }
+    if(corrected)toast(`${corrected}行でペアが孤立しないよう修正し、行の固定を解除しました。保存ライブラリは維持されます。`);
+    return corrected;
+  }
+  function updatePairStatus(){
+    const first=refs.pairFirst.value.trim(),second=refs.pairSecond.value.trim();
+    let status;
+    if(first&&second&&first===second)status='同じ表記同士は判別できません。異なる2音を入力してください（ペアは無効）。';
+    else if(first&&second)status=`🔗 有効：${first} → ${second} ／ 1–2・2–3・3–4音目にのみ配置。通常INPUTの同名音もペア専用です。`;
+    else status='未設定：2つとも入力するとペアが有効になります。片方だけでは抽選されません。';
+    refs.pairStatus.textContent=status;
+    refs.pairStatus.classList.toggle('enabled',Boolean(pairConfig()));
+  }
+  // Semi-random mutates exactly one ordinary slot OR one *unit* consisting
+  // of the two paired slots. No mutation is permitted to split a pair.
+  function evolveOne(previous,pool=soundPool()){
+    const safe=repairPhrase(previous,pool),pair=pairConfig();
+    const pairs=pairStarts(safe,pair),occupied=new Set();
+    for(const j of pairs){occupied.add(j);occupied.add(j+1);}
+    const singles=[];
+    for(let j=0;j<SLOTS;j++){
+      if(occupied.has(j))continue;
+      const alternatives=pool.filter(s=>s!==safe[j]);
+      if(alternatives.length)singles.push({j,alternatives});
+    }
+    const pairActions=[];
+    if(pair){
+      // Insert pair in 2 adjacent ordinary cells, never as the 4th cell.
+      for(let j=0;j<SLOTS-1;j++){
+        if(!occupied.has(j)&&!occupied.has(j+1))pairActions.push({kind:'insert',j});
+      }
+      // Remove one pair only if other ordinary sounds exist to fill its cells.
+      if(pool.length)for(const j of pairs)pairActions.push({kind:'remove',j});
+    }
+    if(!singles.length&&!pairActions.length)return [...safe];
+    if(pairActions.length&&(!singles.length||Math.random()<.27)){
+      const action=pick(pairActions),next=[...safe];
+      if(action.kind==='insert'){next[action.j]=pair[0];next[action.j+1]=pair[1];}
+      else {next[action.j]=pick(pool);next[action.j+1]=pick(pool);}
+      return next;
+    }
+    const change=pick(singles),next=[...safe];
+    next[change.j]=pick(change.alternatives);
     return next;
   }
   function rebuildSemiFrom(startIndex=0){
@@ -303,7 +417,7 @@
     refs.toast.textContent=msg;refs.toast.classList.remove('hidden');
     toastTimer=setTimeout(()=>refs.toast.classList.add('hidden'),3200);
   }
-  function packageState(){return {version:4,sounds:soundInputs.map(el=>el.value),bpm:Number(refs.bpm.value),bars:Number(refs.bars.value),metro:refs.metro.checked,mode,semiPrepared,phrases,pinned,activeRow,library};}
+  function packageState(){return {version:5,sounds:soundInputs.map(el=>el.value),pair:[refs.pairFirst.value,refs.pairSecond.value],bpm:Number(refs.bpm.value),bars:Number(refs.bars.value),metro:refs.metro.checked,mode,semiPrepared,phrases,pinned,activeRow,library};}
   function saveState(){
     try{localStorage.setItem(STORE_KEY,JSON.stringify(packageState()));}
     catch(e){if(!persistWarningShown){persistWarningShown=true;toast('保存できません。通常のSafariで開くか、JSONバックアップを作成してください。');}}
@@ -314,6 +428,9 @@
     if(Array.isArray(data.sounds)&&(data.sounds.length===4||data.sounds.length===INPUTS)){
       soundInputs.forEach((el,i)=>el.value=typeof data.sounds[i]==='string'?data.sounds[i].slice(0,24):'');
     }
+    refs.pairFirst.value=Array.isArray(data.pair)&&typeof data.pair[0]==='string'?data.pair[0].slice(0,24):'';
+    refs.pairSecond.value=Array.isArray(data.pair)&&typeof data.pair[1]==='string'?data.pair[1].slice(0,24):'';
+    updatePairStatus();
     if(Number.isFinite(Number(data.bpm))&&String(data.bpm).trim()!=='')refs.bpm.value=String(Math.min(300,Math.max(20,Math.round(Number(data.bpm)))));
     if(Number.isInteger(Number(data.bars))&&Number(data.bars)>=8&&Number(data.bars)<=128&&Number(data.bars)%8===0)refs.bars.value=String(data.bars);
     if(typeof data.metro==='boolean')refs.metro.checked=data.metro;
@@ -368,8 +485,9 @@
       btn.textContent=pinned[i]?'Saved':'Save';
       const small=document.createElement('small');small.textContent=pinned[i]?' 🔒':` #${i+1}`;btn.append(small);
       const cells=document.createElement('div');cells.className='cells';
+      const starts=pairStarts(phrase);
       phrase.forEach((s,j)=>{
-        const cell=document.createElement('div');cell.className=`cell${isDelta(i,j)?' delta':''}`;
+        const cell=document.createElement('div');cell.className=`cell${isDelta(i,j)?' delta':''}${starts.includes(j)?' pair-first':''}${starts.includes(j-1)?' pair-second':''}`;
         const input=document.createElement('input');input.className='phrase-slot-input';input.type='text';input.maxLength=24;
         input.value=s;input.placeholder='—';input.dataset.editRow=String(i);input.dataset.editSlot=String(j);
         input.setAttribute('aria-label',`行${i+1}の${j+1}音目を編集`);
@@ -390,6 +508,9 @@
       const i=Number(input.dataset.editRow),j=Number(input.dataset.editSlot);
       if(document.activeElement!==input&&input.value!==phrases[i][j])input.value=phrases[i][j];
       input.parentElement.classList.toggle('delta',isDelta(i,j));
+      const starts=pairStarts(phrases[i]);
+      input.parentElement.classList.toggle('pair-first',starts.includes(j));
+      input.parentElement.classList.toggle('pair-second',starts.includes(j-1));
     });
     refs.phraseList.querySelectorAll('.phrase-row').forEach(row=>{
       const i=Number(row.dataset.row),button=row.querySelector('.save-btn');
@@ -404,8 +525,8 @@
     refs.randomMode.setAttribute('aria-pressed',String(mode==='random'));
     refs.semiMode.setAttribute('aria-pressed',String(mode==='semi'));
     refs.modeNote.textContent=mode==='semi'
-      ?'半ランダム：1行目を起点に1音ずつ変化。Startまたは「1行目から生成」で準備。Saveした行は固定優先。'
-      :'完全ランダム：従来どおり各音を独立抽選し、切替時はActive以外を再抽選。';
+      ?'半ランダム：前行から1音だけ変化。ペアを入れる／外す時だけ2枠を1セットとして変更。Save行は固定優先。'
+      :'完全ランダム：単音は独立抽選。ペアだけは必ず連続2枠で配置。切替時はActive以外を再抽選。';
   }
   function setMode(next){
     if(run){toast('生成方式はStopしてから変更してください。');return;}
@@ -414,10 +535,14 @@
   }
   function generateSemi(){
     if(run){toast('生成するにはStopしてください。');return false;}
-    if(!soundPool().length){toast('INPUTがすべてNULLです。1つ以上入力してください。');return false;}
+    if(!hasCandidates()){toast('通常INPUTかペアを1つ以上設定してください。');return false;}
+    normalizeWorkingPhrases();
+    if(phrases[0].every(s=>!s))phrases[0]=randomPhrase();
     mode='semi';rebuildSemiFrom(0);
     updateModeUI();redrawPhrases();saveState();
-    if(new Set(soundPool()).size<2 && phrases[0].every(s=>s===soundPool()[0]))
+    if(pairConfig()&&!soundPool().length)
+      toast('ペアだけではフレーズが固定されます。半ランダムで変化させるには通常INPUTに単音を追加してください。');
+    else if(!pairConfig()&&new Set(soundPool()).size<2 && phrases[0].every(s=>s===soundPool()[0]))
       toast('ほかの候補音がないため変化できません。INPUTを2種類以上にすると1音ずつ変わります。');
     else toast('1行目を起点に、2→3→4行目を1音ずつ変化させました。');
     return true;
@@ -485,7 +610,7 @@
     redrawPhrases();saveState();
   }
   function resetAll(){
-    if(!soundPool().length){toast('INPUTがすべてNULLです。1つ以上入力してください。');return;}
+    if(!hasCandidates()){toast('通常INPUTかペアを1つ以上設定してください。');return;}
     phrases=Array.from({length:ROWS},()=>randomPhrase());
     pinned=Array(ROWS).fill(false);
     if(mode==='semi')rebuildSemiFrom(0);
@@ -573,6 +698,7 @@
   function updateControls(){
     const started=Boolean(run),paused=Boolean(run?.paused);
     refs.bpm.disabled=started;refs.bars.disabled=started;
+    refs.pairFirst.disabled=started;refs.pairSecond.disabled=started;
     refs.randomMode.disabled=started;refs.semiMode.disabled=started;refs.semiGenerate.disabled=started;
     refs.start.disabled=starting||(started&&!paused);
     refs.start.textContent=paused?'▶ Resume':'▶ Start';refs.start.classList.toggle('resume-state',paused);
@@ -606,7 +732,7 @@
       previous.lastDisplayBeat=-1;
     }else{
       // Selected starting row is respected in BOTH modes.
-      if(mode==='semi'&&!semiPrepared)rebuildSemiFrom(0);
+      if(mode==='semi'&&!semiPrepared){normalizeWorkingPhrases();rebuildSemiFrom(0);}
       redrawPhrases();markWarning(false);
       const startTime=now+.07;
       run={bpm,bars,clock,startTime,secondsPerBeat:60/bpm,nextBeatIndex:0,nextBeatAt:startTime,
@@ -646,6 +772,11 @@
     const select=ev.target.closest('button[data-select]');
     if(select)selectStartRow(Number(select.dataset.select));
   });
+  // Capture original before inline editing so invalid boundary edits can revert.
+  refs.phraseList.addEventListener('focusin',ev=>{
+    const field=ev.target.closest('input[data-edit-row]');
+    if(field)field.dataset.before=phrases[Number(field.dataset.editRow)][Number(field.dataset.editSlot)];
+  });
   // Direct inline edit: the selected sound is always a real text input.
   refs.phraseList.addEventListener('input',ev=>{
     const field=ev.target.closest('input[data-edit-row]');if(!field)return;
@@ -658,7 +789,22 @@
   refs.phraseList.addEventListener('change',ev=>{
     const field=ev.target.closest('input[data-edit-row]');if(!field)return;
     const i=Number(field.dataset.editRow),j=Number(field.dataset.editSlot);
-    phrases[i][j]=field.value.trim();field.value=phrases[i][j];
+    const pair=pairConfig(),wanted=field.value.trim();
+    phrases[i][j]=wanted;
+    if(pair&&wanted===pair[0]){
+      if(j===SLOTS-1){
+        // There is no 5th sound: reject this orphaned pair head.
+        phrases[i][j]=field.dataset.before||soundPool()[0]||'';
+        toast('ペアの1音目は4音目には置けません。元の音に戻しました。');
+      }else phrases[i][j+1]=pair[1];
+    }else if(pair&&wanted===pair[1]){
+      if(j===0){
+        phrases[i][j]=field.dataset.before||soundPool()[0]||'';
+        toast('ペアの2音目を1音目に単独配置できません。元の音に戻しました。');
+      }else phrases[i][j-1]=pair[0];
+    }
+    phrases[i]=repairPhrase(phrases[i]);
+    field.value=phrases[i][j];
     if(mode==='semi')rebuildSemiFrom(i);
     syncEditedPhrases();saveState();
   });
@@ -669,8 +815,11 @@
     const load=ev.target.closest('button[data-load]'),del=ev.target.closest('button[data-delete]');
     if(load){
       const item=library.find(x=>x.id===load.dataset.load);if(!item)return;
-      phrases[3]=[...item.phrase];pinned[3]=true;
-      redrawPhrases();saveState();toast(`「${item.name}」を行4へ読み込み、固定しました。`);
+      const adjusted=repairPhrase(item.phrase);
+      phrases[3]=adjusted;pinned[3]=true;
+      redrawPhrases();saveState();toast(equalPhrase(item.phrase,adjusted)
+        ?`「${item.name}」を行4へ読み込み、固定しました。`
+        :`「${item.name}」をペア規則に合わせて調整し、行4に固定しました。元の保存版は変更しません。`);
       if(run&&!run.paused)displayAt(getElapsed());
     }
     if(del){
@@ -684,14 +833,19 @@
     const item=library.find(x=>x.id===input.dataset.rename);if(!item)return;
     item.name=input.value.trim().slice(0,80)||'無題のフレーズ';input.value=item.name;saveState();
   });
-  soundInputs.forEach(el=>el.addEventListener('change',()=>{
-    if(soundPool().length){
+  function inputsChanged(){
+    updatePairStatus();
+    normalizeWorkingPhrases();
+    if(hasCandidates()){
       if(mode==='semi')rebuildSemiFrom(0);
       else for(let i=0;i<ROWS;i++)if(i!==activeRow&&!pinned[i])phrases[i]=randomPhrase();
       redrawPhrases();
     }
     saveState();
-  }));
+  }
+  soundInputs.forEach(el=>el.addEventListener('change',inputsChanged));
+  refs.pairFirst.addEventListener('change',inputsChanged);
+  refs.pairSecond.addEventListener('change',inputsChanged);
   refs.bpm.addEventListener('change',()=>{
     let n=Number(refs.bpm.value);if(!Number.isFinite(n)||!refs.bpm.value.trim())n=80;
     refs.bpm.value=String(Math.min(300,Math.max(20,Math.round(n))));saveState();
@@ -702,7 +856,7 @@
     const data={...packageState(),exported:new Date().toISOString()};
     const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;
-    a.download=`4-sound-lab-v4-backup-${new Date().toISOString().slice(0,10)}.json`;
+    a.download=`4-sound-lab-v5-backup-${new Date().toISOString().slice(0,10)}.json`;
     document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);toast('バックアップを保存しました。');
   });
   $('importBtn').addEventListener('click',()=>$('importFile').click());
@@ -711,15 +865,15 @@
     try{
       if(f.size>2*1024*1024)throw Error('too-big');
       const data=JSON.parse(await f.text());
-      if(![2,3,4].includes(data.version)||!Array.isArray(data.library)||!Array.isArray(data.phrases)||!
+      if(![2,3,4,5].includes(data.version)||!Array.isArray(data.library)||!Array.isArray(data.phrases)||!
         [3,4].includes(data.phrases.length)||!data.phrases.every(validPhrase))throw Error('format');
       if(!confirm('現在のライブラリ・設定・4行のフレーズを置き換えます。続けますか？'))return;
-      stop();activeRow=0;applyData(data);redrawPhrases();redrawLibrary();
+      stop();activeRow=0;applyData(data);normalizeWorkingPhrases();redrawPhrases();redrawLibrary();
       refs.barTotal.textContent=refs.bars.value;saveState();toast('バックアップを読み込みました。');
-    }catch(e){toast('読み込み失敗。4 SOUND LAB v2/v3/v4のJSONバックアップを選んでください。');}
+    }catch(e){toast('読み込み失敗。4 SOUND LAB v2/v3/v4/v5のJSONを選んでください。');}
     finally{ev.target.value='';}
   });
-  seed();readState();refs.barTotal.textContent=refs.bars.value;
+  seed();readState();updatePairStatus();normalizeWorkingPhrases();refs.barTotal.textContent=refs.bars.value;
   updateModeUI();redrawPhrases();redrawLibrary();updateControls();
   if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')){
     navigator.serviceWorker.register('./sw.js').catch(()=>{});
