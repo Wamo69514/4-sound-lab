@@ -1,7 +1,7 @@
 {
   "name": "4 SOUND LAB — Scratch Phrase Trainer",
   "short_name": "4 SOUND LAB",
-  "description": "8入力＋連結ペア・4音フレーズ・メトロノーム・保存ライブラリ",
+  "description": "8音＋連結ペア・音の抽選倍率・可変BPM・フレーズ練習と保存ライブラリ",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
