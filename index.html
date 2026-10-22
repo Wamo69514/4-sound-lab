@@ -203,7 +203,7 @@
     .weight-caption { margin:10px 0 0; }
     .pair-weight-row { margin-top:12px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
     .ramp-box { margin-top:14px; padding:13px; border:1px solid #cad6e4; background:#f3f8ff; border-radius:11px; }
-    .ramp-grid { display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:10px; }
+    .ramp-grid { display:grid; grid-template-columns:1.35fr 1fr 1fr 1fr; gap:10px; }
     .setting-select, .setting-number { width:100%; background:white; min-height:44px; border:2px solid #27364c; border-radius:8px; padding:8px; font-weight:850; font-size:15px; }
     .setting-select:disabled, .setting-number:disabled { background:#e9edf2; }
     .status-grid { grid-template-columns:repeat(4,minmax(0,1fr)); }
@@ -234,9 +234,9 @@
     <header>
       <div>
         <p class="eyebrow">ONBRAKE / SCRATCH PRACTICE</p>
-        <h1>4 SOUND LAB<span style="color:var(--red)">.</span><span class="version-label">v6.0</span></h1>
+        <h1>4 SOUND LAB<span style="color:var(--red)">.</span><span class="version-label">v6.1</span></h1>
       </div>
-      <div class="header-aside">WEIGHTED SOUNDS + TEMPO RAMP.<br>4/4 PRACTICE TOOL</div>
+      <div class="header-aside">WEIGHTED SOUNDS + TEMPO RAMP LIMIT.<br>4/4 PRACTICE TOOL</div>
     </header>
 
     <section class="panel" aria-labelledby="soundsTitle">
@@ -277,8 +277,9 @@
           <div class="field"><label for="rampMode">増加タイミング</label><select id="rampMode" class="setting-select"><option value="off">OFF（固定BPM）</option><option value="bars">小節ごと</option><option value="phrases">フレーズごと</option></select></div>
           <div class="field"><label for="rampEvery">何小節／何フレーズごと</label><input type="number" id="rampEvery" class="setting-number" min="1" max="128" step="1" inputmode="numeric" value="8" aria-label="BPMを上げる間隔"></div>
           <div class="field"><label for="rampStep">何BPMずつ増やす</label><input type="number" id="rampStep" class="setting-number" min="1" max="50" step="1" inputmode="numeric" value="5" aria-label="一度に上がるBPM"></div>
+          <div class="field"><label for="rampMax">上限BPM</label><input type="number" id="rampMax" class="setting-number" min="20" max="300" step="1" inputmode="numeric" value="300" aria-label="BPMの上限"></div>
         </div>
-        <p id="rampNote" class="mode-note">OFF：開始BPMで固定。上限300 BPM。Pause中も進行を保存します。</p>
+        <p id="rampNote" class="mode-note">OFF：開始BPMで固定。ONにすると設定した上限で加速を止めます。</p>
       </div>
       <div class="mode-box">
         <div class="mode-heading">PHRASE MODE / 生成方式</div>
@@ -322,7 +323,7 @@
       <div class="library-empty" id="libraryEmpty">Saveしたフレーズがここにたまります。<br>「読み込む」で必ず4行目へ挿入・固定します。</div>
       <div class="library-list" id="libraryList"></div>
     </section>
-    <p class="footer-note">フレーズ生成は「完全ランダム」「半ランダム」「固定（変化なし）」の3種類。固定中はSave不要で4行を繰り返し、Resetは無効です。フレーズの各マスは文字入力に加えて▼からSOUND INPUTの音を選択できます。iOSでは「入力完了」ボタンでもキーボードを閉じられます。抽選倍率は相対値で、×0の音も手動でフレーズに置くことは可能です。固定モードでは確率設定は参照されません。BPM RAMPは指定小節／フレーズごとに加速し、300BPMで止まります。Stopすると開始BPMに戻ります。ペア音は「1音目→2音目」の隣接セットで出現し、1音目だけが4音目に来ることはありません。通常INPUTに同じ文字があればペア専用として扱います。両方入力で有効、同じ文字同士のペアは無効です。半ランダムは原則1枠ずつ変化、ペアの挿入・削除時だけ2枠をまとめて変更します。4音のマスをタップすると直接編集できます（編集中の行がSavedなら固定だけ解除、元のライブラリは変更しません）。開始行は右端のLINE/STARTボタンで選択します（再生中はPause/Stop後）。完全ランダムは従来どおり。半ランダムは1行目を種に2→3→4行目をそれぞれ直前の行から1音だけ変えて用意し、4→1へ戻るたびに1音変化させて循環します。「1行目から生成」で再作成、「Start」で選択中のモードを開始します。変える音が他にない場合、同じ音のままです。Saveした行は固定優先なので1音差にならない場合があります。固定モードは4行とも表示内容を保持し、Activeだけ順送りにします。固定中でも各マスの編集・Save・ライブラリ読み込みが可能です。Saveは押した行だけをライブラリ保存・固定、読み込み先は4行目。Resetは全行を再生成・固定解除しますが、ライブラリは消しません。Pauseは続きから再開できます。データは端末内に保存され、自動同期しません。iOSの画面ロック・バックグラウンド中はメトロノームが停止する場合があります。</p>
+    <p class="footer-note">フレーズ生成は「完全ランダム」「半ランダム」「固定（変化なし）」の3種類。固定中はSave不要で4行を繰り返し、Resetは無効です。フレーズの各マスは文字入力に加えて▼からSOUND INPUTの音を選択できます。iOSでは「入力完了」ボタンでもキーボードを閉じられます。抽選倍率は相対値で、×0の音も手動でフレーズに置くことは可能です。固定モードでは確率設定は参照されません。BPM RAMPは指定小節／フレーズごとに加速し、設定した上限BPMで止まります。Stopすると開始BPMに戻ります。ペア音は「1音目→2音目」の隣接セットで出現し、1音目だけが4音目に来ることはありません。通常INPUTに同じ文字があればペア専用として扱います。両方入力で有効、同じ文字同士のペアは無効です。半ランダムは原則1枠ずつ変化、ペアの挿入・削除時だけ2枠をまとめて変更します。4音のマスをタップすると直接編集できます（編集中の行がSavedなら固定だけ解除、元のライブラリは変更しません）。開始行は右端のLINE/STARTボタンで選択します（再生中はPause/Stop後）。完全ランダムは従来どおり。半ランダムは1行目を種に2→3→4行目をそれぞれ直前の行から1音だけ変えて用意し、4→1へ戻るたびに1音変化させて循環します。「1行目から生成」で再作成、「Start」で選択中のモードを開始します。変える音が他にない場合、同じ音のままです。Saveした行は固定優先なので1音差にならない場合があります。固定モードは4行とも表示内容を保持し、Activeだけ順送りにします。固定中でも各マスの編集・Save・ライブラリ読み込みが可能です。Saveは押した行だけをライブラリ保存・固定、読み込み先は4行目。Resetは全行を再生成・固定解除しますが、ライブラリは消しません。Pauseは続きから再開できます。データは端末内に保存され、自動同期しません。iOSの画面ロック・バックグラウンド中はメトロノームが停止する場合があります。</p>
   </main>
   <button id="doneEditing" class="keyboard-done hidden" type="button">⌨ 入力完了 ✓</button>
   <div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
@@ -353,7 +354,7 @@
     barDisplay:$('barDisplay'), barTotal:$('barTotal'), beatDisplay:$('beatDisplay'),
     countdown:$('countdown'), runState:$('runState'),warning:$('warningLabel'),
     pairFirst:$('pairFirst'),pairSecond:$('pairSecond'),pairStatus:$('pairStatus'),
-    rampMode:$('rampMode'),rampEvery:$('rampEvery'),rampStep:$('rampStep'),rampNote:$('rampNote'),liveBpm:$('liveBpm'),
+    rampMode:$('rampMode'),rampEvery:$('rampEvery'),rampStep:$('rampStep'),rampMax:$('rampMax'),rampNote:$('rampNote'),liveBpm:$('liveBpm'),
     pairWeight:$('pairWeight'),doneEditing:$('doneEditing'),
     progress:$('progress'), progressFill:$('progressFill'),
     dots:[...document.querySelectorAll('.beat-dot')],toast:$('toast')
@@ -497,7 +498,7 @@
     version:6,sounds:soundInputs.map(el=>el.value),weights:weightInputs.map(el=>Number(el.value)),
     pair:[refs.pairFirst.value,refs.pairSecond.value],pairWeight:Number(refs.pairWeight.value),
     bpm:run?run.baseBpm:Number(refs.bpm.value),bars:Number(refs.bars.value),metro:refs.metro.checked,
-    rampMode:refs.rampMode.value,rampEvery:Number(refs.rampEvery.value),rampStep:Number(refs.rampStep.value),
+    rampMode:refs.rampMode.value,rampEvery:Number(refs.rampEvery.value),rampStep:Number(refs.rampStep.value),rampMax:Number(refs.rampMax.value),
     mode,semiPrepared,phrases,pinned,activeRow,library};
   }
   function saveState(){
@@ -515,11 +516,13 @@
     if(['off','bars','phrases'].includes(data.rampMode))refs.rampMode.value=data.rampMode;
     if(Number.isInteger(Number(data.rampEvery))&&Number(data.rampEvery)>=1&&Number(data.rampEvery)<=128)refs.rampEvery.value=String(data.rampEvery);
     if(Number.isInteger(Number(data.rampStep))&&Number(data.rampStep)>=1&&Number(data.rampStep)<=50)refs.rampStep.value=String(data.rampStep);
-    updateRampUI();
+    // v6 and earlier backups omit rampMax; preserve their original 300 BPM limit.
+    refs.rampMax.value=String(data.rampMax!==undefined?clampNumber(data.rampMax,20,300,300):300);
     refs.pairFirst.value=Array.isArray(data.pair)&&typeof data.pair[0]==='string'?data.pair[0].slice(0,24):'';
     refs.pairSecond.value=Array.isArray(data.pair)&&typeof data.pair[1]==='string'?data.pair[1].slice(0,24):'';
     updatePairStatus();
     if(Number.isFinite(Number(data.bpm))&&String(data.bpm).trim()!=='')refs.bpm.value=String(Math.min(300,Math.max(20,Math.round(Number(data.bpm)))));
+    normalizeRampMax();updateRampUI();
     if(Number.isInteger(Number(data.bars))&&Number(data.bars)>=8&&Number(data.bars)<=128&&Number(data.bars)%8===0)refs.bars.value=String(data.bars);
     if(typeof data.metro==='boolean')refs.metro.checked=data.metro;
     mode=['random','semi','fixed'].includes(data.mode)?data.mode:'random';
@@ -767,7 +770,7 @@
   function tempoForBeat(owner,index){
     if(owner.rampMode==='off')return owner.baseBpm;
     const interval=owner.rampEvery*4*(owner.rampMode==='phrases'?owner.bars:1);
-    return Math.min(300,owner.baseBpm+Math.floor(index/interval)*owner.rampStep);
+    return Math.min(owner.rampMaxBpm,owner.baseBpm+Math.floor(index/interval)*owner.rampStep);
   }
   function beatTime(owner,index){
     while(owner.beatTimes.length<=index){
@@ -843,6 +846,7 @@
     refs.bpm.disabled=started;refs.bars.disabled=started;
     refs.rampMode.disabled=started;refs.rampEvery.disabled=started||refs.rampMode.value==='off';
     refs.rampStep.disabled=started||refs.rampMode.value==='off';
+    refs.rampMax.disabled=started||refs.rampMode.value==='off';
     refs.pairFirst.disabled=started;refs.pairSecond.disabled=started;
     refs.randomMode.disabled=started;refs.semiMode.disabled=started;refs.fixedMode.disabled=started;refs.semiGenerate.disabled=started||mode==='fixed';
     refs.reset.disabled=mode==='fixed';
@@ -859,6 +863,7 @@
     let bpm=previous?previous.baseBpm:Math.round(Number(refs.bpm.value));
     if(!Number.isFinite(bpm))bpm=80;
     bpm=Math.max(20,Math.min(300,bpm));refs.bpm.value=String(bpm);
+    if(!previous)normalizeRampMax();
     const bars=previous?previous.bars:Number(refs.bars.value)||32;
     const AudioContextType=window.AudioContext||window.webkitAudioContext;
     let clock='performance';
@@ -886,6 +891,7 @@
       const startTime=now+.07;
       run={baseBpm:bpm,bars,clock,startTime,rampMode:refs.rampMode.value,
         rampEvery:clampNumber(refs.rampEvery.value,1,128,8),rampStep:clampNumber(refs.rampStep.value,1,50,5),
+        rampMaxBpm:clampNumber(refs.rampMax.value,bpm,300,300),
         beatTimes:[0],lastLocatedBeat:0,nextBeatIndex:0,nextBeatAt:startTime,
         lastCycle:0,lastDisplayBeat:-1,paused:false,pausedElapsed:0,frame:null,scheduler:null,oscillators:new Set()};
     }
@@ -1038,20 +1044,38 @@
   function clampNumber(v,min,max,fallback){
     const n=Number(v);return v===''||!Number.isFinite(n)?fallback:Math.max(min,Math.min(max,Math.round(n)));
   }
+  function normalizeRampMax(){
+    // A ramp never lowers the starting tempo. Clamp a too-low limit up to the start BPM.
+    const base=clampNumber(refs.bpm.value,20,300,80);
+    const original=clampNumber(refs.rampMax.value,20,300,300);
+    const limit=Math.max(base,original);
+    refs.rampMax.value=String(limit);
+    return limit;
+  }
   function updateRampUI(){
     const on=refs.rampMode.value!=='off';
     refs.rampEvery.disabled=!on||Boolean(run);refs.rampStep.disabled=!on||Boolean(run);
+    refs.rampMax.disabled=!on||Boolean(run);
     const every=clampNumber(refs.rampEvery.value,1,128,8),step=clampNumber(refs.rampStep.value,1,50,5);
-    refs.rampNote.textContent=on?`${every}${refs.rampMode.value==='bars'?'小節':'フレーズ'}ごとに +${step} BPM。上限300 BPM（開始値はTEMPO欄）。`:'OFF：設定したBPMで固定。ONにすると小節やフレーズの区切りで加速します。';
+    const cap=clampNumber(refs.rampMax.value,20,300,300);
+    const startBpm=clampNumber(refs.bpm.value,20,300,80);
+    refs.rampNote.textContent=on?`${every}${refs.rampMode.value==='bars'?'小節':'フレーズ'}ごとに +${step} BPM。上限 ${cap} BPMで加速停止（フレーズとメトロノームは継続）。${cap===startBpm?'開始BPMと上限が同じため増速しません。':''}`:'OFF：設定したBPMで固定。ONにすると小節やフレーズの区切りで上限まで加速します。';
   }
   refs.rampMode.addEventListener('change',()=>{updateRampUI();saveState();});
   for(const el of [refs.rampEvery,refs.rampStep])el.addEventListener('change',()=>{
     el.value=String(clampNumber(el.value,1,el===refs.rampEvery?128:50,el===refs.rampEvery?8:5));
     updateRampUI();saveState();
   });
+  refs.rampMax.addEventListener('change',()=>{
+    const requested=clampNumber(refs.rampMax.value,20,300,300);
+    const adjusted=normalizeRampMax();
+    if(adjusted>requested)toast('上限BPMは開始BPM以上に設定してください。');
+    updateRampUI();saveState();
+  });
   refs.bpm.addEventListener('change',()=>{
     let n=Number(refs.bpm.value);if(!Number.isFinite(n)||!refs.bpm.value.trim())n=80;
-    refs.bpm.value=String(Math.min(300,Math.max(20,Math.round(n))));refs.liveBpm.textContent=refs.bpm.value;saveState();
+    refs.bpm.value=String(Math.min(300,Math.max(20,Math.round(n))));refs.liveBpm.textContent=refs.bpm.value;
+    normalizeRampMax();updateRampUI();saveState();
   });
   refs.bars.addEventListener('change',()=>{refs.barTotal.textContent=refs.bars.value;saveState();});
   refs.metro.addEventListener('change',()=>{saveState();toast(refs.metro.checked?'メトロノーム ON':'メトロノーム OFF');});
@@ -1059,7 +1083,7 @@
     const data={...packageState(),exported:new Date().toISOString()};
     const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;
-    a.download=`4-sound-lab-v6-backup-${new Date().toISOString().slice(0,10)}.json`;
+    a.download=`4-sound-lab-v6_1-backup-${new Date().toISOString().slice(0,10)}.json`;
     document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);toast('バックアップを保存しました。');
   });
   $('importBtn').addEventListener('click',()=>$('importFile').click());
@@ -1076,7 +1100,7 @@
     }catch(e){toast('読み込み失敗。4 SOUND LAB v2〜v6のJSONを選んでください。');}
     finally{ev.target.value='';}
   });
-  seed();readState();updatePairStatus();updateRampUI();normalizeWorkingPhrases();
+  seed();readState();updatePairStatus();normalizeRampMax();updateRampUI();normalizeWorkingPhrases();
   refs.liveBpm.textContent=refs.bpm.value;refs.barTotal.textContent=refs.bars.value;
   updateModeUI();redrawPhrases();redrawLibrary();updateControls();
   if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')){
